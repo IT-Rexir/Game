@@ -1,0 +1,3858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MOBA Next Gen Interface</title>
+    <style>
+        /* --- Root & Reset --- */
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+            user-select: none;
+
+        }
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-gold: #ffb700;
+            --gold-gradient: linear-gradient(135deg, #ffe066 0%, #f39c12 50%, #d35400 100%);
+            --blue-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            --glass-bg: rgba(12, 19, 36, 0.85);
+            --glass-border: rgba(0, 240, 255, 0.25);
+            --text-glow: 0 0 10px rgba(0, 240, 255, 0.5);
+
+        }
+        body {
+            background: #080c14;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+            overscroll-behavior: none;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+
+        }
+
+        /* --- Force Landscape Orientation Warning Overlay --- */
+         #orientation-warning {
+            position: fixed;
+            inset: 0;
+            background: #080c14;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+
+        }
+        .rotate-icon {
+            font-size: 50px;
+            animation: rotatePhone 2s infinite ease-in-out;
+            margin-bottom: 20px;
+
+        }
+        @keyframes rotatePhone {
+            0%, 100% {
+                transform: rotate(0deg);
+
+            }
+            50% {
+                transform: rotate(90deg);
+
+            }
+
+        }
+        @media screen and (orientation: portrait) {
+            #orientation-warning {
+                display: flex;
+
+            }
+
+        }
+
+        /* =========================================
+                   SCREEN 1: AUTHENTICATION
+                   ========================================= */
+         #auth-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+
+        }
+        .auth-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--neon-blue);
+            border-radius: 16px;
+            padding: 30px 40px;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-height: 90vh;
+            overflow-y: auto;
+
+        }
+        .auth-logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: var(--text-glow);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+
+        }
+        .auth-input, .auth-select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+
+        }
+        .auth-input:focus, .auth-select:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--blue-gradient);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 5px;
+
+        }
+        .auth-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.6);
+
+        }
+        .auth-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+
+        }
+
+        /* RESPONSIVE AUTH SCREEN: compact and landscape-friendly */
+        #auth-screen { padding: 10px; overflow-y: auto; }
+        .auth-box {
+            width: min(420px, 94vw);
+            max-width: 94vw;
+            padding: clamp(12px, 2.4vh, 24px) clamp(14px, 3vw, 28px);
+            max-height: calc(100dvh - 20px);
+            gap: 0;
+            border-radius: 14px;
+        }
+        .auth-logo { font-size: clamp(20px, 4.4vh, 28px); margin-bottom: clamp(6px, 1.5vh, 14px); }
+        .auth-input, .auth-select {
+            padding: clamp(8px, 1.7vh, 12px) 12px;
+            margin-bottom: clamp(6px, 1.4vh, 12px);
+            font-size: clamp(13px, 2.4vh, 16px);
+            min-height: 38px;
+        }
+        .auth-btn { padding: clamp(9px, 1.8vh, 13px); font-size: clamp(14px, 2.7vh, 18px); margin-top: 3px; }
+        .auth-divider { margin: 6px 0; }
+        #auth-error { overflow-wrap: anywhere; }
+        @media (orientation: landscape) and (max-height: 500px) {
+            #auth-screen { align-items: flex-start; padding: 6px; }
+            .auth-box {
+                width: min(440px, 72vw);
+                padding: 8px 16px;
+                max-height: calc(100dvh - 12px);
+                overflow-y: auto;
+            }
+            .auth-logo { font-size: 20px; margin-bottom: 5px; letter-spacing: 1px; }
+            .auth-input, .auth-select { padding: 6px 10px; margin-bottom: 5px; min-height: 32px; font-size: 13px; }
+            .auth-btn { padding: 7px; font-size: 14px; }
+            .auth-divider { margin: 3px 0; }
+        }
+        @media (orientation: landscape) and (min-height: 501px) {
+            .auth-box { width: min(420px, 76vw); }
+        }
+        .auth-divider {
+            width: 100%;
+            margin: 20px 0;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+
+        }
+        .auth-divider span {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0c1324;
+            padding: 0 10px;
+            font-size: 12px;
+            color: #94a3b8;
+
+        }
+        .btn-gmail-login {
+            background: #ea4335;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+
+        }
+        .btn-gmail-login:hover {
+            background: #d32f2f;
+            box-shadow: 0 0 20px rgba(234, 67, 53, 0.6);
+
+        }
+
+        /* =========================================
+                   SCREEN 2: LOADING SCREEN
+                   ========================================= */
+         #loading-screen {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 100px;
+            z-index: 40;
+            background: url('20337.jpg') center/cover;
+            background-color: #111;
+
+        }
+        .loading-text {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+
+        }
+        .loading-bar-container {
+            width: 60%;
+            height: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            overflow: hidden;
+
+        }
+        .loading-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+            transition: width 0.1s linear;
+
+        }
+
+        /* =========================================
+                   SCREEN 3: MAIN GAME UI
+                   ========================================= */
+         #main-game-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            position: relative;
+            z-index: 10;
+            background: url('battle.jpg') center/cover no-repeat;
+            background-color: #1a1a2e;
+
+        }
+        .main-floating-battlefield {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 55vw;
+            max-width: 650px;
+            pointer-events: none;
+            animation: floatCenterIsland 6s ease-in-out infinite;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+        }
+        @keyframes floatCenterIsland {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0px);
+
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(-15px);
+
+            }
+
+        }
+        .main-battlefield-img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 25px 35px rgba(0,0,0,0.7));
+
+        }
+        .rank-display {
+            margin-top: -20px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--neon-gold);
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--neon-gold);
+            text-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+        }
+        .rank-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+
+        }
+
+        /* Top Bar */
+         .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 5;
+
+        }
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg);
+            padding: 8px 16px 8px 8px;
+            border-radius: 40px;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+        }
+        .profile-card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            transform: translateY(-2px);
+
+        }
+        .avatar-frame {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00f0ff, #e0a300);
+            padding: 2px;
+
+        }
+        .avatar-img-dynamic {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #1e293b;
+            display: grid;
+            place-items: center;
+            font-weight: bold;
+            background-size: cover;
+            background-position: center;
+
+        }
+        .player-meta {
+            display: flex;
+            flex-direction: column;
+
+        }
+        .player-name {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+
+        }
+        .player-level {
+            font-size: 11px;
+            color: var(--neon-blue);
+            font-weight: 600;
+
+        }
+        .resource-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
+        }
+        .resource-bar {
+            display: flex;
+            gap: 15px;
+            background: var(--glass-bg);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+
+        }
+        .res-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s;
+
+        }
+        .res-item:hover {
+            transform: scale(1.05);
+
+        }
+        .res-item i {
+            width: 18px;
+            height: 18px;
+
+        }
+        .ping-display {
+            font-size: 14px;
+            font-weight: bold;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: 1px solid #0f0;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+        }
+        .ping-display.yellow {
+            border-color: yellow;
+            color: yellow;
+            text-shadow: 0 0 5px yellow;
+            background: rgba(255, 255, 0, 0.1);
+
+        }
+        .ping-display.red {
+            border-color: red;
+            color: red;
+            text-shadow: 0 0 5px red;
+            background: rgba(255, 0, 0, 0.1);
+
+        }
+
+        /* Middle Action Sidebars */
+         .middle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            flex-grow: 1;
+            z-index: 5;
+            pointer-events: none;
+
+        }
+        .middle-container > * {
+            pointer-events: auto;
+
+        }
+        .side-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+
+        }
+        .side-btn {
+            width: 60px;
+            height: 60px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+            position: relative;
+
+        }
+        .side-btn:hover {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--neon-blue);
+            transform: scale(1.08);
+
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: none;
+
+        }
+
+        /* Friends Panel Enhancements */
+         .friends-panel {
+            width: 250px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            backdrop-filter: blur(8px);
+            max-height: 280px;
+            overflow-y: auto;
+
+        }
+        .friend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 4px;
+
+        }
+        .add-friend-icon-btn {
+            background: none;
+            border: none;
+            color: var(--neon-blue);
+            cursor: pointer;
+            font-size: 14px;
+
+        }
+        .friend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            font-size: 12px;
+            margin-bottom: 4px;
+
+        }
+        .friend-info {
+            display: flex;
+            flex-direction: column;
+
+        }
+        .friend-status {
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+
+        }
+        .status-dot.online {
+            background: #00ff00;
+            box-shadow: 0 0 5px #00ff00;
+
+        }
+        .status-dot.offline {
+            background: #ff4444;
+
+        }
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+
+        }
+        .btn-accept {
+            background: #10b981;
+            color: white;
+            margin-right: 4px;
+
+        }
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+
+        }
+
+        /* Bottom Bar */
+         .bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 20px 40px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            z-index: 5;
+
+        }
+        .nav-links {
+            display: flex;
+            gap: 35px;
+
+        }
+        .nav-item {
+            font-size: 16px;
+            font-weight: 700;
+            color: #94a3b8;
+            cursor: pointer;
+            padding-bottom: 8px;
+            transition: color 0.3s;
+            position: relative;
+
+        }
+        .nav-item:hover, .nav-item.active {
+            color: #fff;
+            text-shadow: var(--text-glow);
+
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--neon-blue);
+            box-shadow: var(--text-glow);
+
+        }
+        .play-cta {
+            position: relative;
+            background: var(--gold-gradient);
+            border: none;
+            padding: 16px 50px;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #0d1117;
+            clip-path: polygon(12% 0, 100% 0, 88% 100%, 0% 100%);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 25px rgba(243, 156, 18, 0.4);
+
+        }
+        .play-cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px rgba(243, 156, 18, 0.7);
+
+        }
+
+        /* =========================================
+                   UNIVERSAL MODAL STYLES (SHOP, EVENTS, HEROES, ETC.)
+                   ========================================= */
+         .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+
+        }
+        .profile-modal {
+            width: 90vw;
+            max-width: 1000px;
+            height: 88vh;
+            background: var(--glass-bg);
+            border: 1px solid var(--neon-blue);
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+
+        }
+        .modal-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            background: rgba(0,0,0,0.3);
+
+        }
+        .close-btn {
+            font-size: 28px;
+            cursor: pointer;
+            color: #fff;
+            line-height: 1;
+
+        }
+        .close-btn:hover {
+            color: var(--neon-blue);
+
+        }
+        .profile-tabs-nav {
+            display: flex;
+            background: rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+            overflow-x: auto;
+
+        }
+        .profile-tab-btn {
+            flex: 1;
+            min-width: 110px;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            text-align: center;
+            white-space: nowrap;
+
+        }
+        .profile-tab-btn.active {
+            color: #fff;
+            border-bottom: 3px solid var(--neon-blue);
+            text-shadow: var(--text-glow);
+            background: rgba(0, 240, 255, 0.05);
+
+        }
+        .profile-layout {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+            padding: 20px 30px;
+
+        }
+        .profile-section-block {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+
+        }
+        .profile-section-block.active {
+            display: flex;
+
+        }
+        .section-title {
+            font-size: 18px;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+
+        }
+
+        /* Profile Specific Styles */
+         .profile-top-section {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+
+        }
+        .avatar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-width: 120px;
+
+        }
+        .modal-avatar-lg {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: 3px solid var(--neon-gold);
+            background-size: cover;
+            background-position: center;
+            display: grid;
+            place-items: center;
+            font-size: 35px;
+            box-shadow: 0 0 20px rgba(255, 183, 0, 0.3);
+
+        }
+        .change-photo-btn {
+            background: var(--blue-gradient);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+            transition: transform 0.2s;
+
+        }
+        .change-photo-btn:hover {
+            transform: scale(1.05);
+
+        }
+        .change-photo-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+
+        }
+        .info-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+
+        }
+        .detail-row {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+
+        }
+        .stat-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            max-width: 500px;
+
+        }
+        .account-btn {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            transition: 0.2s;
+
+        }
+        .account-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+
+        }
+        .btn-gmail {
+            background: #ea4335;
+            color: white;
+
+        }
+        .btn-gmail:hover:not(:disabled) {
+            background: #d32f2f;
+
+        }
+        .btn-wipe {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+
+        }
+        .btn-wipe:hover {
+            background: #ff4444;
+            color: white;
+
+        }
+
+        /* =========================================
+                   SHOP, EVENTS, HEROES, ACHIEVEMENTS, INVENTORY, MAIL, SETTINGS SPECIFIC UI STYLES
+                   ========================================= */
+         .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+
+        }
+        .filter-input, .filter-select {
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+
+        }
+        .filter-input {
+            flex-grow: 1;
+            max-width: 250px;
+
+        }
+
+        /* Shop Grid Cards */
+         .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+
+        }
+        .shop-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.2s;
+
+        }
+        .shop-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0,240,255,0.2);
+
+        }
+        .shop-card-img {
+            height: 120px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            display: grid;
+            place-items: center;
+            font-size: 32px;
+            position: relative;
+
+        }
+        .rarity-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+
+        }
+        .rarity-epic {
+            background: #9333ea;
+            color: #fff;
+
+        }
+        .rarity-legendary {
+            background: #f59e0b;
+            color: #000;
+
+        }
+        .rarity-rare {
+            background: #3b82f6;
+            color: #fff;
+
+        }
+        .discount-label {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+
+        }
+        .shop-card-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+            justify-content: space-between;
+
+        }
+        .item-name {
+            font-size: 15px;
+            font-weight: bold;
+
+        }
+        .item-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+
+        }
+        .buy-card-btn {
+            width: 100%;
+            padding: 8px;
+            background: var(--blue-gradient);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+
+        }
+        .buy-card-btn:hover {
+            opacity: 0.9;
+
+        }
+
+        /* Events Layout */
+         .event-banner-card {
+            background: linear-gradient(135deg, rgba(0,198,255,0.2), rgba(0,0,0,0.6));
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+
+        }
+        .event-banner-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+        }
+        .countdown-timer {
+            font-size: 12px;
+            color: var(--neon-gold);
+            font-weight: bold;
+            background: rgba(0,0,0,0.4);
+            padding: 4px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--neon-gold);
+
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--neon-blue);
+            box-shadow: 0 0 8px var(--neon-blue);
+            transition: width 0.3s;
+
+        }
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+
+        }
+
+        /* Heroes Collection Layout */
+         .heroes-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            height: 100%;
+
+        }
+        .hero-grid-sidebar {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            align-content: start;
+
+        }
+        .hero-thumb {
+            height: 75px;
+            background: #1e293b;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            font-size: 24px;
+            position: relative;
+            transition: 0.2s;
+
+        }
+        .hero-thumb:hover, .hero-thumb.selected {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0,240,255,0.4);
+
+        }
+        .hero-detail-pane {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+
+        }
+
+        /* Achievements Layout */
+         .achievement-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 10px;
+
+        }
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,183,0,0.1);
+            border: 1px solid var(--neon-gold);
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            flex-shrink: 0;
+
+        }
+
+        /* Inventory Layout */
+         .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
+
+        }
+        .inventory-item-slot {
+            height: 90px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: 0.2s;
+
+        }
+        .inventory-item-slot:hover {
+            border-color: var(--neon-blue);
+
+        }
+        .item-qty {
+            position: absolute;
+            bottom: 4px;
+            right: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.8);
+            padding: 1px 4px;
+            border-radius: 4px;
+
+        }
+
+        /* Mail Layout */
+         .mail-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            height: 100%;
+
+        }
+        .mail-list {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+
+        }
+        .mail-row {
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: 0.2s;
+            position: relative;
+
+        }
+        .mail-row:hover, .mail-row.active {
+            background: rgba(0,240,255,0.1);
+            border-color: var(--neon-blue);
+
+        }
+        .mail-row.unread::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--neon-blue);
+
+        }
+        .mail-detail-pane {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+
+        }
+
+        /* Settings Layout */
+         .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+
+        }
+        .setting-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+        }
+        .setting-toggle {
+            width: 44px;
+            height: 24px;
+            background: #334155;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+
+        }
+        .setting-toggle.active {
+            background: var(--neon-blue);
+            box-shadow: 0 0 8px var(--neon-blue);
+
+        }
+        .setting-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+
+        }
+        .setting-toggle.active::after {
+            left: 22px;
+
+        }
+
+        /* =========================================
+                   5-MAN PARTY LOBBY
+                   ========================================= */
+         #partyLobbyModal {
+            z-index: 125;
+
+        }
+        .party-lobby-box {
+            width: 92vw;
+            max-width: 900px;
+            min-height: 520px;
+            max-height: 90vh;
+            background: var(--glass-bg);
+            border: 1px solid var(--neon-blue);
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0,240,255,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+        }
+        .party-lobby-content {
+            display: grid;
+            grid-template-columns: 1.35fr .85fr;
+            gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+
+        }
+        .party-slots-panel, .party-friends-panel {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+
+        }
+        .party-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 12px;
+            margin-top: 12px;
+
+        }
+        .party-slot {
+            min-height: 105px;
+            border: 1px dashed rgba(0,240,255,0.25);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+
+        }
+        .party-slot.filled {
+            border-style: solid;
+            border-color: rgba(0,240,255,0.35);
+            background: rgba(0,240,255,0.05);
+
+        }
+        .party-slot-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #1e293b;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            flex-shrink: 0;
+
+        }
+        .party-slot-name {
+            font-weight: 800;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+        }
+        .party-slot-status {
+            color: #94a3b8;
+            font-size: 10px;
+            margin-top: 4px;
+
+        }
+        .party-host-badge {
+            color: var(--neon-gold);
+            font-size: 9px;
+            font-weight: 800;
+            margin-left: 5px;
+
+        }
+        .party-empty {
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+
+        }
+        .party-friend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 9px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            margin-top: 7px;
+
+        }
+        .party-friend-info {
+            min-width: 0;
+
+        }
+        .party-friend-name {
+            font-size: 12px;
+            font-weight: 700;
+
+        }
+        .party-friend-status {
+            font-size: 9px;
+            color: #94a3b8;
+
+        }
+        .party-invite-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 5px;
+            background: var(--blue-gradient);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+
+        }
+        .party-invite-btn:disabled {
+            background: #334155;
+            color: #94a3b8;
+            cursor: not-allowed;
+
+        }
+        .party-request-row {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:8px;
+            padding:9px;
+            border-radius:8px;
+            background:rgba(255,183,0,0.06);
+            border:1px solid rgba(255,183,0,0.2);
+            margin-bottom:8px;
+
+        }
+        .party-request-actions {
+            display:flex;
+            gap:5px;
+
+        }
+        .party-request-actions button {
+            padding:5px 8px;
+            border:0;
+            border-radius:5px;
+            color:#fff;
+            font-size:10px;
+            font-weight:800;
+            cursor:pointer;
+
+        }
+        .party-accept-request {
+            background:#10b981;
+
+        }
+        .party-reject-request {
+            background:#ef4444;
+
+        }
+        .party-add-hint {
+            font-size:10px;
+            color:#64748b;
+            margin-top:8px;
+            line-height:1.4;
+
+        }
+
+        /* Fast MOBA party lobby - original UI inspired by common mobile MOBA party layouts */
+         .party-lobby-box {
+            width:96vw;
+            max-width:1120px;
+            height:88vh;
+            min-height:430px;
+            background:linear-gradient(180deg,rgba(9,15,29,.97),rgba(5,10,20,.98));
+            border:1px solid rgba(255,183,0,.45);
+            border-radius:10px;
+            box-shadow:0 18px 60px rgba(0,0,0,.7),0 0 30px rgba(255,183,0,.12);
+
+        }
+        .party-lobby-header {
+            height:64px;
+            padding:10px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            background:linear-gradient(90deg,rgba(255,183,0,.13),rgba(0,198,255,.08),transparent);
+            border-bottom:1px solid rgba(255,255,255,.09);
+
+        }
+        .party-mode-title {
+            font-size:18px;
+            font-weight:900;
+            letter-spacing:1.5px;
+            color:#fff;
+
+        }
+        .party-mode-sub {
+            font-size:10px;
+            color:#94a3b8;
+            margin-top:3px;
+
+        }
+        .party-lobby-content {
+            grid-template-columns:1fr 300px;
+            gap:0;
+            padding:0;
+            overflow:hidden;
+            background:radial-gradient(circle at 50% 35%,rgba(0,198,255,.07),transparent 45%);
+
+        }
+        .party-slots-panel {
+            border:0;
+            border-right:1px solid rgba(255,255,255,.08);
+            border-radius:0;
+            padding:20px;
+            display:flex;
+            flex-direction:column;
+            min-width:0;
+
+        }
+        .party-slots-grid {
+            flex:1;
+            display:grid;
+            grid-template-columns:repeat(5,minmax(100px,1fr));
+            gap:12px;
+            align-items:center;
+            margin-top:8px;
+
+        }
+        .party-slot {
+            min-height:240px;
+            height:100%;
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:8px;
+            background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.32));
+            padding:12px;
+            display:flex;
+            flex-direction:column;
+            justify-content:flex-end;
+            align-items:center;
+            text-align:center;
+            position:relative;
+            overflow:hidden;
+
+        }
+        .party-slot::before {
+            content:'';
+            position:absolute;
+            inset:0;
+            background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.8));
+            pointer-events:none;
+
+        }
+        .party-slot.filled {
+            border-color:rgba(255,183,0,.42);
+            background:linear-gradient(180deg,rgba(255,183,0,.09),rgba(0,0,0,.45));
+
+        }
+        .party-slot-avatar {
+            width:82px;
+            height:82px;
+            border-radius:50%;
+            border:2px solid rgba(255,183,0,.7);
+            background:radial-gradient(circle,#26354c,#0b111e);
+            display:grid;
+            place-items:center;
+            font-size:34px;
+            margin:auto auto 12px;
+            position:relative;
+            z-index:1;
+            box-shadow:0 0 20px rgba(255,183,0,.15);
+
+        }
+        .party-slot-name,.party-slot-status {
+            position:relative;
+            z-index:1;
+
+        }
+        .party-slot-name {
+            font-size:13px;
+            font-weight:900;
+            max-width:100%;
+
+        }
+        .party-slot-status {
+            font-size:9px;
+            margin-top:4px;
+
+        }
+        .party-empty {
+            position:relative;
+            z-index:1;
+            color:#64748b;
+            font-size:11px;
+
+        }
+        .party-friends-panel {
+            border:0;
+            border-radius:0;
+            padding:16px;
+            background:rgba(0,0,0,.22);
+            overflow-y:auto;
+
+        }
+        .party-friend-row {
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.06);
+            margin-top:8px;
+
+        }
+        .party-lobby-footer {
+            height:70px;
+            padding:10px 18px;
+            background:rgba(0,0,0,.55);
+            border-top:1px solid rgba(255,255,255,.08);
+
+        }
+        .party-start-btn {
+            min-width:190px;
+            background:linear-gradient(135deg,#ffd45a,#e98d08,#b65a00);
+            color:#111;
+            box-shadow:0 0 18px rgba(243,156,18,.22);
+
+        }
+        @media(max-width:850px) {
+            .party-lobby-content {
+                grid-template-columns:1fr;
+                overflow-y:auto;
+
+            }
+            .party-slots-panel {
+                border-right:0;
+
+            }
+            .party-slots-grid {
+                grid-template-columns:repeat(5,minmax(90px,1fr));
+                overflow-x:auto;
+                min-height:270px;
+
+            }
+            .party-slot {
+                min-width:90px;
+
+            }
+            .party-friends-panel {
+                min-height:190px;
+
+            }
+
+        }
+        .party-lobby-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3);
+
+        }
+        .party-count {
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 700;
+
+        }
+        .party-count strong {
+            color: var(--neon-blue);
+
+        }
+        .party-action-row {
+            display: flex;
+            gap: 10px;
+
+        }
+        .party-action-btn {
+            padding: 11px 20px;
+            border-radius: 7px;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+
+        }
+        .party-leave-btn {
+            background: #334155;
+            color: #fff;
+
+        }
+        .party-start-btn {
+            background: var(--gold-gradient);
+            color: #0d1117;
+
+        }
+        .party-start-btn:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+
+        }
+        .lobby-invite-badge {
+            position: fixed;
+            right: 20px;
+            top: 85px;
+            z-index: 200;
+            display: none;
+            background: var(--glass-bg);
+            border: 1px solid var(--neon-gold);
+            border-radius: 10px;
+            padding: 12px;
+            width: 260px;
+            box-shadow: 0 0 20px rgba(255,183,0,0.25);
+
+        }
+        .lobby-invite-badge.active {
+            display: block;
+
+        }
+        .lobby-invite-actions {
+            display:flex;
+            gap:7px;
+            margin-top:10px;
+
+        }
+        .lobby-invite-actions button {
+            flex:1;
+            padding:7px;
+            border:0;
+            border-radius:5px;
+            font-weight:700;
+            cursor:pointer;
+
+        }
+        @media (max-width: 700px) {
+            .party-lobby-content {
+                grid-template-columns: 1fr;
+
+            }
+            .party-slots-grid {
+                grid-template-columns: 1fr;
+
+            }
+            .party-lobby-box {
+                min-height: 0;
+
+            }
+
+        }
+
+        /* TOAST NOTIFICATIONS */
+         #toast-container {
+            position:fixed;
+            top:18px;
+            right:18px;
+            z-index:99999;
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+            width:min(360px,calc(100vw - 36px));
+            pointer-events:none;
+
+        }
+        .game-toast {
+            pointer-events:auto;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:12px 15px;
+            border-radius:10px;
+            color:#fff;
+            background:rgba(8,15,30,.96);
+            border:1px solid rgba(0,240,255,.45);
+            box-shadow:0 8px 25px rgba(0,0,0,.45),0 0 15px rgba(0,240,255,.12);
+            backdrop-filter:blur(10px);
+            font-size:12px;
+            font-weight:700;
+            animation:toastIn .22s ease-out;
+
+        }
+        .game-toast.success {
+            border-color:rgba(16,185,129,.7);
+
+        }
+        .game-toast.error {
+            border-color:rgba(239,68,68,.75);
+
+        }
+        .game-toast.warning {
+            border-color:rgba(245,158,11,.75);
+
+        }
+        .game-toast .toast-icon {
+            font-size:16px;
+            flex:0 0 auto;
+
+        }
+        .game-toast .toast-text {
+            flex:1;
+            line-height:1.35;
+
+        }
+        @keyframes toastIn {
+            from {
+                opacity:0;
+                transform:translateX(25px)
+            }
+            to {
+                opacity:1;
+                transform:translateX(0)
+            }
+
+        }
+        @keyframes toastOut {
+            from {
+                opacity:1;
+                transform:translateX(0)
+            }
+            to {
+                opacity:0;
+                transform:translateX(25px)
+            }
+
+        }
+
+        /* ADD FRIEND MODAL STYLES */
+         .sub-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 150;
+            display: none;
+            justify-content: center;
+            align-items: center;
+
+        }
+        .sub-modal-overlay.active {
+            display: flex;
+
+        }
+        .sub-modal-box {
+            background: #0c1324;
+            border: 1px solid var(--neon-blue);
+            padding: 25px;
+            border-radius: 12px;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,240,255,0.3);
+
+        }
+        .search-result-box {
+            margin-top: 15px;
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+
+        }
+    </style>
+</head>
+<body>
+
+    <!-- OVERLAY -->
+    <div id="orientation-warning">
+        <div class="rotate-icon">📱</div>
+        <h2>Please Rotate Your Device</h2>
+        <p style="color: #94a3b8; margin-top: 10px;">This MOBA game requires Landscape Mode to play properly.</p>
+    </div>
+
+    <!-- 1. ACCOUNT CREATION & LOGIN -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <div class="auth-logo">ENTER GAME</div>
+            <p id="auth-error" style="color: #ff4444; font-size: 12px; margin-bottom: 10px; display:none;"></p>
+            
+            <input type="text" id="username-input" class="auth-input" placeholder="Create Username..." autocomplete="off">
+            
+            <select id="country-select" class="auth-select">
+                <option value="" disabled selected>Select Country</option>
+                <option value="Philippines">🇵🇭 Philippines</option>
+                <option value="United States">🇺🇸 United States</option>
+                <option value="Indonesia">🇮🇩 Indonesia</option>
+                <option value="Malaysia">🇲🇾 Malaysia</option>
+                <option value="Vietnam">🇻🇳 Vietnam</option>
+                <option value="Japan">🇯🇵 Japan</option>
+                <option value="Global">🌐 Other / Global</option>
+            </select>
+
+            <select id="gender-select" class="auth-select">
+                <option value="" disabled selected>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other / Prefer not to say</option>
+            </select>
+
+            <button id="auth-submit-btn" class="auth-btn" onclick="startGameFlow()">CREATE ACCOUNT</button>
+            
+            <div class="auth-divider"><span>OR</span></div>
+            
+            <button id="auth-gmail-login-btn" class="auth-btn btn-gmail-login" onclick="loginWithGmail()">
+                <i data-lucide="mail"></i> LOGIN WITH GMAIL
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. LOADING -->
+    <div id="loading-screen">
+        <div class="loading-text" id="loading-text">CONNECTING TO SERVER...</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill" id="loading-bar"></div>
+        </div>
+    </div>
+
+    <!-- 3. MAIN GAME -->
+    <div id="main-game-screen">
+        <div class="main-floating-battlefield">
+            <img src="mambo.gif" alt="Floating Battlefield" class="main-battlefield-img" onerror="this.src='https://via.placeholder.com/600x300?text=Floating+Battlefield'">
+            
+            <div class="rank-display">
+                <img src="bronze.png" alt="Rank Icon" class="rank-icon" id="rank-icon-img" onerror="this.style.display='none'">
+                <span id="rank-display-text">Bronze</span>
+            </div>
+        </div>
+
+        <header class="top-bar">
+            <div class="profile-card" onclick="toggleProfileModal(true)">
+                <div class="avatar-frame">
+                    <div class="avatar-img-dynamic" id="topbar-avatar">👤</div>
+                </div>
+                <div class="player-meta">
+                    <span class="player-name" id="display-username-top">Player</span>
+                    <span class="player-level" id="display-country-top">Lv. 1 • 🌐</span>
+                </div>
+            </div>
+
+            <div class="resource-container">
+                <div class="ping-display" id="ping-indicator">
+                    <i data-lucide="wifi"></i> <span id="ping-text">24ms</span>
+                </div>
+                
+                <div class="resource-bar">
+                    <div class="res-item" style="color: var(--neon-gold);" onclick="openShopModal()">🪙 <span id="gold-count">0</span></div>
+                    <div class="res-item" style="color: var(--neon-blue);" onclick="openShopModal()">💎 <span id="diamond-count">0</span></div>
+                    <div class="res-item" style="color: #fff; margin-left: 10px; position:relative;" onclick="openMailModal()" title="Mail">
+                        <i data-lucide="mail"></i>
+                        <span class="notification-badge" id="mail-badge">!</span>
+                    </div>
+                    <div class="res-item" style="color: #fff;" onclick="openSettingsModal()" title="Settings"><i data-lucide="settings"></i></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="middle-container">
+            <nav class="side-menu">
+                <div class="side-btn" onclick="openShopModal()">
+                    <i data-lucide="shopping-cart"></i><span>Shop</span>
+                </div>
+                <div class="side-btn" onclick="openEventsModal()">
+                    <i data-lucide="calendar"></i><span>Events</span>
+                    <span class="notification-badge" id="events-badge">!</span>
+                </div>
+            </nav>
+            
+            <!-- Dynamic Friend List Panel -->
+            <aside class="friends-panel">
+                <div class="friend-header">
+                    <span>FRIENDS LIST</span>
+                    <button class="add-friend-icon-btn" onclick="toggleAddFriendModal(true)" title="Add Friend"><i data-lucide="user-plus" style="width:16px;height:16px;"></i></button>
+                </div>
+                <div id="friend-requests-container" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px;">
+                    <!-- Pending requests populate here -->
+                </div>
+                <div id="friends-list-container" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div class="friend-row">
+                        <span style="color:#94a3b8; font-size:11px;">Loading friends...</span>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="bottom-bar">
+            <nav class="nav-links">
+                <div class="nav-item" onclick="openInventoryModal()">PREPARATION</div>
+                <div class="nav-item" onclick="openHeroesModal()">HEROES</div>
+                <div class="nav-item" onclick="openAchievementsModal()">ACHIEVEMENT</div>
+                <div class="nav-item" onclick="openInventoryModal()">INVENTORY</div>
+            </nav>
+            <button class="play-cta" onclick="openPartyLobby()">PLAY</button>
+        </footer>
+    </div>
+
+
+    <!-- 5-MAN PARTY LOBBY -->
+    <div class="modal-overlay" id="partyLobbyModal">
+        <div class="party-lobby-box">
+            <div class="party-lobby-header">
+                <div>
+                    <div class="party-mode-title">CLASSIC • 5V5</div>
+                    <div class="party-mode-sub" id="party-lobby-id">PARTY ROOM • -</div>
+                </div>
+                <button class="close-btn" onclick="leavePartyLobby()" style="background:none;border:0;">&times;</button>
+            </div>
+
+            <div class="party-lobby-content">
+                <section class="party-slots-panel">
+                    <div style="display:flex;justify-content:space-between;align-items:center;"><div class="section-title" style="margin-bottom:0;">TEAM</div><span style="font-size:10px;color:#64748b;">5 PLAYER PARTY</span></div>
+                    <div id="party-slots-grid" class="party-slots-grid"></div>
+                </section>
+
+                <section class="party-friends-panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="section-title" style="margin-bottom:0;">INVITE PLAYERS</div>
+                        <button class="party-invite-btn" onclick="openPartyAddFriend()" style="padding:7px 11px;">＋ ADD PLAYER</button>
+                    </div>
+
+                    <div id="party-friend-requests" style="margin-top:12px;"></div>
+
+                    <div id="party-friends-list">
+                        <div style="color:#64748b;font-size:11px;margin-top:12px;">Loading friends...</div>
+                    </div>
+                    <div class="party-add-hint">Need someone who isn't your friend yet? Tap <strong>＋ ADD PLAYER</strong>, search their username or Account ID, then they can accept the request.</div>
+                </section>
+            </div>
+
+            <div class="party-lobby-footer">
+                <div class="party-count">PLAYERS <strong id="party-player-count">1/5</strong></div>
+                <div class="party-action-row">
+                    <button class="party-action-btn party-leave-btn" onclick="leavePartyLobby()">LEAVE</button>
+                    <button id="party-start-btn" class="party-action-btn party-start-btn" onclick="startPartyMatch()" disabled>START MATCH</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INCOMING PARTY INVITE -->
+    <div id="lobbyInviteBadge" class="lobby-invite-badge">
+        <div style="font-size:11px;color:var(--neon-gold);font-weight:800;">PARTY INVITE</div>
+        <div id="lobbyInviteText" style="font-size:13px;font-weight:700;margin-top:4px;">You were invited to a party.</div>
+        <div class="lobby-invite-actions">
+            <button style="background:#10b981;color:#fff;" onclick="acceptPartyInvite()">ACCEPT</button>
+            <button style="background:#334155;color:#fff;" onclick="declinePartyInvite()">DECLINE</button>
+        </div>
+    </div>
+
+    <!-- ADD FRIEND POPUP MODAL -->
+    <div class="sub-modal-overlay" id="addFriendModal">
+        <div class="sub-modal-box">
+            <h3 style="color: var(--neon-blue); margin-bottom: 15px;">ADD FRIEND</h3>
+            <input type="text" id="friend-search-input" class="auth-input" placeholder="Enter ID or Username..." autocomplete="off">
+            <button class="auth-btn" onclick="searchUserForFriend()" style="padding: 10px; font-size: 15px;">SEARCH</button>
+            <p id="search-error-msg" style="color: #ff4444; font-size: 12px; margin-top: 8px; display: none;"></p>
+            
+            <div id="search-result-container" class="search-result-box">
+                <div style="text-align: left;">
+                    <div id="res-name" style="font-weight: bold; font-size: 14px;"></div>
+                    <div id="res-status" style="font-size: 11px; color: #94a3b8;"></div>
+                </div>
+                <button class="auth-btn" id="add-action-btn" onclick="sendFriendRequest()" style="width: auto; padding: 6px 12px; font-size: 13px; margin:0;">ADD</button>
+            </div>
+
+            <button onclick="toggleAddFriendModal(false)" style="background: none; border: none; color: #94a3b8; margin-top: 15px; cursor: pointer; font-size: 13px;">Close</button>
+        </div>
+    </div>
+
+    <!-- 4. PROFILE MODAL -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">PLAYER PROFILE</h2>
+                <span class="close-btn" onclick="toggleProfileModal(false)">&times;</span>
+            </div>
+            
+            <div class="profile-tabs-nav">
+                <button class="profile-tab-btn active" onclick="switchProfileTab('profile', this)">Profile</button>
+                <button class="profile-tab-btn" onclick="switchProfileTab('statistics', this)">Statistics</button>
+                <button class="profile-tab-btn" onclick="switchProfileTab('account', this)">Account</button>
+            </div>
+
+            <div class="profile-layout">
+                <div id="p-tab-profile" class="profile-section-block active">
+                    <h3 class="section-title">Identity</h3>
+                    <div class="profile-top-section">
+                        <div class="avatar-col">
+                            <div class="modal-avatar-lg" id="modal-avatar">👑</div>
+                        </div>
+                        
+                        <div class="info-col">
+                            <div class="detail-row"><span style="color: #94a3b8;">User</span><span id="modal-display-username" style="font-weight: bold;">-</span></div>
+                            <div class="detail-row"><span style="color: #94a3b8;">Origin</span><span id="modal-display-country" style="font-weight: bold;">-</span></div>
+                            <div class="detail-row"><span style="color: #94a3b8;">Account ID</span><span id="modal-display-id" style="font-weight: bold; color: var(--neon-gold);">-</span></div>
+                            <div class="detail-row"><span style="color: #94a3b8;">Level</span><span id="modal-display-level" style="font-weight: bold;">-</span></div>
+                            <div class="detail-row"><span style="color: #94a3b8;">Rank</span><span id="modal-display-rank" style="font-weight: bold; color: var(--neon-blue);">-</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="p-tab-statistics" class="profile-section-block">
+                    <h3 class="section-title">Combat Record</h3>
+                    <div class="stat-card">
+                        <div><div style="color: #94a3b8; font-size: 14px;">Rank Points</div><div id="stat-rank-pts" style="font-size: 24px; font-weight: bold;">0</div></div>
+                        <i data-lucide="award" style="color: var(--neon-gold); width: 32px; height: 32px;"></i>
+                    </div>
+                    <div class="stat-card">
+                        <div><div style="color: #94a3b8; font-size: 14px;">Experience (XP)</div><div id="stat-xp" style="font-size: 24px; font-weight: bold;">0</div></div>
+                        <i data-lucide="trending-up" style="color: var(--neon-blue); width: 32px; height: 32px;"></i>
+                    </div>
+                </div>
+
+                <div id="p-tab-account" class="profile-section-block">
+                    <h3 class="section-title">Account Security</h3>
+                    <p style="color: #94a3b8; margin-bottom: 25px; font-size: 14px;">Secure your account to ensure your data is never lost.</p>
+                    <button id="gmail-bind-btn" class="account-btn btn-gmail" onclick="bindGmail()">
+                        <i data-lucide="mail"></i> <span id="bind-btn-text">Bind to Gmail Account</span>
+                    </button>
+                    <button class="account-btn btn-wipe" onclick="wipeData()"><i data-lucide="trash-2"></i> Wipe Local Data & Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. UPGRADED MODALS -->
+    <!-- SHOP MODAL -->
+    <div class="modal-overlay" id="shopModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">LOBBY SHOP</h2>
+                <span class="close-btn" onclick="closeModal('shopModal')">&times;</span>
+            </div>
+            <div class="profile-tabs-nav">
+                <button class="profile-tab-btn active" onclick="switchShopTab('all', this)">All Items</button>
+                <button class="profile-tab-btn" onclick="switchShopTab('skin', this)">Skins</button>
+                <button class="profile-tab-btn" onclick="switchShopTab('hero', this)">Heroes</button>
+                <button class="profile-tab-btn" onclick="switchShopTab('emote', this)">Emotes</button>
+            </div>
+            <div class="profile-layout">
+                <div class="filter-bar">
+                    <input type="text" class="filter-input" placeholder="Search item name..." id="shop-search" oninput="filterShopItems()">
+                </div>
+                <div class="item-grid" id="shop-item-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EVENTS MODAL -->
+    <div class="modal-overlay" id="eventsModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">LOBBY EVENTS</h2>
+                <span class="close-btn" onclick="closeModal('eventsModal')">&times;</span>
+            </div>
+            <div class="profile-layout" id="events-layout-container">
+                <!-- Dynamic events list -->
+            </div>
+        </div>
+    </div>
+
+    <!-- HEROES MODAL -->
+    <div class="modal-overlay" id="heroesModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">HERO COLLECTION</h2>
+                <span class="close-btn" onclick="closeModal('heroesModal')">&times;</span>
+            </div>
+            <div class="profile-layout">
+                <div class="filter-bar">
+                    <input type="text" class="filter-input" placeholder="Search hero name..." id="hero-search" oninput="filterHeroesList()">
+                </div>
+                <div class="heroes-container">
+                    <div class="hero-grid-sidebar" id="hero-grid-sidebar">
+                        <!-- Hero thumbs -->
+                    </div>
+                    <div class="hero-detail-pane" id="hero-detail-pane">
+                        <!-- Hero detail -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACHIEVEMENTS MODAL -->
+    <div class="modal-overlay" id="achievementsModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">PLAYER ACHIEVEMENTS</h2>
+                <span class="close-btn" onclick="closeModal('achievementsModal')">&times;</span>
+            </div>
+            <div class="profile-layout">
+                <div id="achievements-list-container">
+                    <!-- Dynamic achievements list -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVENTORY MODAL -->
+    <div class="modal-overlay" id="inventoryModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">PLAYER INVENTORY</h2>
+                <span class="close-btn" onclick="closeModal('inventoryModal')">&times;</span>
+            </div>
+            <div class="profile-layout">
+                <div class="filter-bar">
+                    <input type="text" class="filter-input" placeholder="Search inventory items..." id="inv-search" oninput="filterInventoryItems()">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 280px; gap: 20px; height: 100%;">
+                    <div class="inventory-grid" id="inventory-grid-container" style="align-content: start;">
+                        <!-- Inventory slots -->
+                    </div>
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between;" id="inventory-detail-panel">
+                        <div>
+                            <h3 class="section-title" id="inv-detail-name">Select an Item</h3>
+                            <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;" id="inv-detail-desc">Click on any item in your inventory to view its details.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIL MODAL -->
+    <div class="modal-overlay" id="mailModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">LOBBY MAILBOX</h2>
+                <div style="display: flex; gap: 10px;">
+                    <span class="close-btn" onclick="closeModal('mailModal')">&times;</span>
+                </div>
+            </div>
+            <div class="profile-layout">
+                <div class="mail-container">
+                    <div class="mail-list" id="mail-list-container">
+                        <!-- Mail list -->
+                    </div>
+                    <div class="mail-detail-pane" id="mail-detail-pane">
+                        <h3 class="section-title" id="mail-subject">Select a Message</h3>
+                        <div style="font-size: 12px; color: #94a3b8;" id="mail-sender-date">Sender: - | Date: -</div>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <p style="font-size: 14px; line-height: 1.5;" id="mail-body-text">Choose a message from the left to read its full details.</p>
+                        <div id="mail-reward-section" style="margin-top: auto; display: none; flex-direction: column; gap: 10px;">
+                            <div style="font-size: 13px; color: var(--neon-gold); font-weight: bold;">Attached Rewards:</div>
+                            <button class="auth-btn" id="claim-mail-reward-btn" style="padding: 10px;" onclick="claimCurrentMailReward()">CLAIM REWARD</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 style="font-size: 20px; color: var(--neon-blue); letter-spacing: 1px;">LOBBY SETTINGS</h2>
+                <span class="close-btn" onclick="closeModal('settingsModal')">&times;</span>
+            </div>
+            <div class="profile-layout">
+                <div id="set-tab-graphics" class="profile-section-block active">
+                    <h3 class="section-title">Graphics Quality</h3>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <span>Graphics Quality Preset</span>
+                            <select class="filter-select" id="graphics-quality-select" onchange="saveSetting('graphics', this.value)">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High" selected>High</option>
+                            </select>
+                        </div>
+                        <div class="setting-card">
+                            <span>FPS Target Settings</span>
+                            <select class="filter-select" id="fps-select" onchange="saveSetting('fps', this.value)">
+                                <option value="30">30 FPS</option>
+                                <option value="60">60 FPS</option>
+                                <option value="120" selected>120 FPS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="account-btn btn-wipe" onclick="wipeData()"><i data-lucide="log-out"></i> Logout Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ICONS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+
+    <!-- FIREBASE & LOGIC SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, setDoc, doc, getDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, onSnapshot, writeBatch, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        /* ==================== FIREBASE CONFIGURATION ==================== */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDeKsWKVHerFw7sKRhWDgE9H-NSKz4erCE",
+            authDomain: "moba-2acf2.firebaseapp.com",
+            projectId: "moba-2acf2",
+            storageBucket: "moba-2acf2.firebasestorage.app",
+            messagingSenderId: "230236860730",
+            appId: "1:230236860730:web:61653132c2ffbbe41fe003",
+            measurementId: "G-TK38PNPLMP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        /* ==================== UTILITIES AND NOTIFICATIONS ==================== */
+        // Non-blocking toast notification system. All existing alert() calls are routed here.
+        const shownToastKeys = new Set();
+        function showToast(message, type = "info", duration = 3200) {
+            const container = document.getElementById("toast-container");
+            if (!container) return;
+            const text = String(message ?? "");
+            const icon = type === "success" ? "✓" : type === "error" ? "✕" : type === "warning" ? "⚠" : "ⓘ";
+            const toast = document.createElement("div");
+            toast.className = `game-toast ${type}`;
+            toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-text"></span>`;
+            toast.querySelector(".toast-text").textContent = text;
+            container.appendChild(toast);
+            const timer = setTimeout(() => { toast.style.animation = "toastOut .2s ease-in forwards"; setTimeout(() => toast.remove(), 220); }, duration);
+            toast.onclick = () => { clearTimeout(timer); toast.remove(); };
+        }
+        function showUniqueToast(key, message, type = "info") {
+            if (shownToastKeys.has(key)) return;
+            shownToastKeys.add(key);
+            showToast(message, type);
+        }
+        window.showToast = showToast;
+        window.alert = (message) => {
+            const text = String(message ?? "");
+            const type = /could not|failed|error|quota|not found/i.test(text) ? "error" : /sent|successful|accepted|claimed|ready|joined/i.test(text) ? "success" : "info";
+            showToast(text, type);
+        };
+
+        let currentUserData = null;
+        let unsubscribeUser = null;
+        let unsubscribeFriends = null;
+        let unsubscribeFriendRequests = null;
+        let unsubscribeInventory = null;
+        let unsubscribeMail = null;
+        let unsubscribeEvents = null;
+        let unsubscribeAchievements = null;
+
+        // --- 5-MAN PARTY LOBBY STATE ---
+        let currentPartyLobbyId = null;
+        let unsubscribePartyLobby = null;
+        let unsubscribePartyInvites = null;
+        let pendingPartyInvite = null;
+
+        // Global state for items
+        let shopItemsData = [];
+        let inventoryData = [];
+        let mailData = [];
+        let eventsData = [];
+        let achievementsData = [];
+        let heroData = [
+            { id: "h1", name: "Astraea", role: "Mage", rarity: "Legendary", icon: "🧙‍♀️" },
+            { id: "h2", name: "Kuro", role: "Assassin", rarity: "Epic", icon: "🥷" },
+            { id: "h3", name: "Gorgon", role: "Tank", rarity: "Epic", icon: "🛡️" },
+            { id: "h4", name: "Valkyrie", role: "Marksman", rarity: "Legendary", icon: "🏹" }
+        ];
+
+        // Ensure database has base items.
+        async function seedDatabaseIfEmpty() {
+            try {
+                const shopSnap = await getDocs(collection(db, "shopItems"));
+                if (shopSnap.empty) {
+                    const batch = writeBatch(db);
+                    const items = [
+                        { itemId: "s1", name: "Cyber Blade Assassin", category: "skin", rarity: "legendary", currency: "diamonds", price: 899, icon: "⚔️", available: true },
+                        { itemId: "h2", name: "Astraea Mage Hero", category: "hero", rarity: "legendary", currency: "coins", price: 32000, icon: "🧙‍♀️", available: true },
+                        { itemId: "e1", name: "Laughing Emoji", category: "emote", rarity: "rare", currency: "coins", price: 1500, icon: "😂", available: true }
+                    ];
+                    items.forEach(item => {
+                        const ref = doc(collection(db, "shopItems"));
+                        batch.set(ref, { ...item, createdAt: serverTimestamp() });
+                    });
+                    await batch.commit();
+                }
+
+                const eventsSnap = await getDocs(collection(db, "events"));
+                if (eventsSnap.empty) {
+                    await addDoc(collection(db, "events"), { eventId: "ev1", title: "Daily Login Streak", description: "Login every day", rewards: { coins: 5000 }, active: true, progressRequired: 1 });
+                }
+
+                const achSnap = await getDocs(collection(db, "achievementsConfig"));
+                if (achSnap.empty) {
+                    await addDoc(collection(db, "achievementsConfig"), { achievementId: "ach1", title: "First Blood", desc: "Get 50 First Bloods.", points: 150, maxProgress: 50 });
+                }
+            } catch(e) { console.error("Seeding error:", e); }
+        }
+
+        // Initialize App & Auto Login
+        window.addEventListener('DOMContentLoaded', async () => {
+            const savedData = localStorage.getItem('moba_userData');
+            if (savedData) {
+                const user = JSON.parse(savedData);
+                document.getElementById('auth-screen').style.display = 'none';
+                triggerLoadingScreen();
+                await initRealtimeListeners(user.uid);
+            }
+            startPingSimulator();
+            if (localStorage.getItem("moba_catalog_seed_checked") !== "1") {
+                seedDatabaseIfEmpty().finally(() => localStorage.setItem("moba_catalog_seed_checked", "1"));
+            }
+        });
+
+        // Setup all Firebase Real-time listeners
+        async function initRealtimeListeners(uid) {
+            // User Document
+            unsubscribeUser = onSnapshot(doc(db, "users", uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                    localStorage.setItem('moba_userData', JSON.stringify(currentUserData));
+                    populateUI(currentUserData);
+                    loadFriendsListRealtime();
+
+                    if (currentPartyLobbyId && document.getElementById('partyLobbyModal')?.classList.contains('active')) {
+                        // The lobby snapshot supplies the current players list.
+                        // Render once after the main friend list is refreshed.
+                        setTimeout(() => renderPartyFriends(), 0);
+                    }
+                    
+                    // Load settings
+                    if(currentUserData.settings) {
+                        if(currentUserData.settings.graphics) document.getElementById('graphics-quality-select').value = currentUserData.settings.graphics;
+                        if(currentUserData.settings.fps) document.getElementById('fps-select').value = currentUserData.settings.fps;
+                    }
+                }
+            });
+
+            // IMPORTANT: never write presence from the users onSnapshot callback.
+            // That creates a write -> snapshot -> write loop and exhausts Firestore quota.
+            updateUserPresence(true);
+
+            // Party invites for the current player
+            if (unsubscribePartyInvites) unsubscribePartyInvites();
+            unsubscribePartyInvites = onSnapshot(
+                query(collection(db, "lobbyInvites"), where("receiverId", "==", uid), where("status", "==", "pending")),
+                (snapshot) => {
+                    const latest = snapshot.docs[snapshot.docs.length - 1];
+                    if (!latest) return;
+                    pendingPartyInvite = { id: latest.id, ...latest.data() };
+                    showUniqueToast(`party-invite-${latest.id}`, `${pendingPartyInvite.senderName || "A player"} invited you to a 5-man party.`, "info");
+                    document.getElementById('lobbyInviteText').innerText =
+                        `${pendingPartyInvite.senderName} invited you to a 5-man party.`;
+                    document.getElementById('lobbyInviteBadge').classList.add('active');
+                },
+                (error) => {
+                    console.error("Party invite listener error:", error);
+                    showToast("Party invitations are temporarily unavailable. Firestore quota may be exhausted.", "error", 5000);
+                }
+            );
+
+            // Friend Requests (Incoming)
+            unsubscribeFriendRequests = onSnapshot(
+                query(collection(db, "friendRequests"), where("receiverId", "==", uid), where("status", "==", "pending")), 
+                (snapshot) => {
+                    const container = document.getElementById('friend-requests-container');
+                    container.innerHTML = "";
+
+                    const lobbyRequestContainer = document.getElementById('party-friend-requests');
+                    if (lobbyRequestContainer) lobbyRequestContainer.innerHTML = "";
+
+                    snapshot.forEach(docSnap => {
+                        const req = docSnap.data();
+                        showUniqueToast(`friend-request-${docSnap.id}`, `${req.senderName || "A player"} sent you a friend request.`, "info");
+                        const row = document.createElement('div');
+                        row.className = 'friend-row';
+                        row.innerHTML = `
+                            <div class="friend-info">
+                                <span style="font-weight:700; color:var(--neon-gold)">Request: ${req.senderName}</span>
+                            </div>
+                            <div>
+                                <button class="btn-small btn-accept" onclick="acceptFriendRequest('${docSnap.id}', '${req.senderId}')">✔</button>
+                                <button class="btn-small btn-reject" onclick="rejectFriendRequest('${docSnap.id}')">✖</button>
+                            </div>
+                        `;
+                        container.appendChild(row);
+
+                        // Also show the same pending request inside the 5-man lobby.
+                        if (lobbyRequestContainer) {
+                            const lobbyRow = document.createElement('div');
+                            lobbyRow.className = 'party-request-row';
+                            lobbyRow.innerHTML = `
+                                <div style="min-width:0;">
+                                    <div style="font-size:10px;color:var(--neon-gold);font-weight:800;">FRIEND REQUEST</div>
+                                    <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                        ${escapePartyText(req.senderName)}
+                                    </div>
+                                </div>
+                                <div class="party-request-actions">
+                                    <button class="party-accept-request" onclick="acceptFriendRequest('${docSnap.id}', '${req.senderId}')">ACCEPT</button>
+                                    <button class="party-reject-request" onclick="rejectFriendRequest('${docSnap.id}')">DECLINE</button>
+                                </div>
+                            `;
+                            lobbyRequestContainer.appendChild(lobbyRow);
+                        }
+                    });
+
+                    if (lobbyRequestContainer && snapshot.empty) {
+                        lobbyRequestContainer.innerHTML = "";
+                    }
+                },
+                (error) => {
+                    console.error("Friend request listener error:", error);
+                    showToast("Friend requests are temporarily unavailable. Firestore quota may be exhausted.", "error", 5000);
+                }
+            );
+
+            // Inventory Collection
+            unsubscribeInventory = onSnapshot(collection(db, "users", uid, "inventory"), (snapshot) => {
+                inventoryData = [];
+                snapshot.forEach(docSnap => {
+                    inventoryData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                if(document.getElementById('inventoryModal').classList.contains('active')) renderInventory();
+            });
+
+            // Mail Collection
+            unsubscribeMail = onSnapshot(collection(db, "users", uid, "mail"), (snapshot) => {
+                mailData = [];
+                let unreadCount = 0;
+                snapshot.forEach(docSnap => {
+                    const mail = { id: docSnap.id, ...docSnap.data() };
+                    mailData.push(mail);
+                    if(mail.unread) unreadCount++;
+                });
+                document.getElementById('mail-badge').style.display = unreadCount > 0 ? 'inline-block' : 'none';
+                if(document.getElementById('mailModal').classList.contains('active')) renderMailList();
+            });
+
+            // Load Shop Items (One-time fetch for catalogue)
+            const shopSnap = await getDocs(collection(db, "shopItems"));
+            shopItemsData = [];
+            shopSnap.forEach(d => shopItemsData.push({ id: d.id, ...d.data() }));
+
+            // Initial Welcome Mail if new account
+            const mailSnap = await getDocs(collection(db, "users", uid, "mail"));
+            if(mailSnap.empty) {
+                await addDoc(collection(db, "users", uid, "mail"), {
+                    sender: "System",
+                    subject: "Welcome to MOBA Next Gen!",
+                    body: "Here is a starter gift for joining us.",
+                    rewards: { coins: 1000 },
+                    unread: true, claimed: false, createdAt: serverTimestamp()
+                });
+            }
+        }
+
+        async function updateUserPresence(isOnline) {
+            if (!currentUserData || !currentUserData.uid) return;
+            try {
+                await setDoc(doc(db, "users", currentUserData.uid), { isOnline, lastSeen: serverTimestamp() }, { merge: true });
+            } catch (e) {}
+        }
+
+        window.addEventListener('beforeunload', () => { if(currentUserData) updateUserPresence(false); });
+
+        // --- AUTHENTICATION ---
+        window.startGameFlow = async function() {
+            const username = document.getElementById('username-input').value.trim();
+            const country = document.getElementById('country-select').value || "Global";
+            const genderEl = document.getElementById('gender-select');
+            const gender = genderEl ? (genderEl.value || "Other") : "Other";
+            const btn = document.getElementById('auth-submit-btn');
+            const errorText = document.getElementById('auth-error');
+
+            const showError = (message) => {
+                errorText.innerText = message;
+                errorText.style.display = 'block';
+            };
+            if (!username) { showError("Please enter a username!"); return; }
+            if (username.length < 3 || username.length > 20) {
+                showError("Username must be 3–20 characters."); return;
+            }
+            errorText.style.display = 'none';
+            btn.disabled = true;
+            btn.innerText = "SIGNING IN...";
+
+            try {
+                let user = auth.currentUser;
+                if (!user || user.isAnonymous) {
+                    const credential = await signInWithPopup(auth, googleProvider);
+                    user = credential.user;
+                }
+                if (!user || !user.uid) throw new Error("Google sign-in completed but no Firebase UID was returned.");
+                const uid = user.uid;
+
+                // Step 1: username uniqueness lookup. If this fails, the UI now reports it separately.
+                btn.innerText = "CHECKING USERNAME...";
+                let existing;
+                try {
+                    const q = query(collection(db, "users"), where("username", "==", username));
+                    existing = await getDocs(q);
+                } catch (e) {
+                    console.error("Username lookup failed", e);
+                    throw new Error("USERNAME_LOOKUP_FAILED | " + (e.code || "unknown") + " | " + (e.message || "Firestore rejected the username query"));
+                }
+                if (!existing.empty && !existing.docs.some(d => d.id === uid)) {
+                    showError("Username taken! Choose another username.");
+                    btn.disabled = false; btn.innerText = "CREATE ACCOUNT"; return;
+                }
+
+                // Step 2: write profile under the exact authenticated Firebase UID.
+                const profileRef = doc(db, "users", uid);
+                let profileSnapshot;
+                try {
+                    profileSnapshot = await getDoc(profileRef);
+                } catch (e) {
+                    console.error("Profile read failed", e);
+                    throw new Error("PROFILE_READ_FAILED | " + (e.code || "unknown") + " | " + (e.message || "Firestore rejected profile read"));
+                }
+
+                if (profileSnapshot.exists()) {
+                    const existingProfile = profileSnapshot.data();
+                    if (existingProfile.username && existingProfile.username !== username) {
+                        showError("This Google account already has a profile. Use LOGIN WITH GMAIL instead.");
+                        btn.disabled = false; btn.innerText = "CREATE ACCOUNT"; return;
+                    }
+                    localStorage.setItem('moba_userData', JSON.stringify(existingProfile));
+                } else {
+                    const newUser = {
+                        uid: uid,
+                        username: username,
+                        country: country,
+                        gender: gender,
+                        level: 1,
+                        coins: 20558,
+                        diamonds: 3,
+                        rank: "Bronze",
+                        rankPoints: 0,
+                        xp: 0,
+                        createdAt: serverTimestamp(),
+                        friends: [],
+                        isOnline: true,
+                        settings: {},
+                        googleUid: uid,
+                        boundEmail: user.email || null
+                    };
+                    try {
+                        await setDoc(profileRef, newUser);
+                    } catch (e) {
+                        console.error("Profile write failed", {code:e.code, message:e.message, uid, projectId:firebaseConfig.projectId});
+                        throw new Error("PROFILE_WRITE_FAILED | " + (e.code || "unknown") + " | " + (e.message || "Firestore rejected profile write") + " | UID=" + uid + " | PROJECT=" + firebaseConfig.projectId);
+                    }
+                    // Store a JSON-safe version (serverTimestamp sentinel cannot be serialized usefully).
+                    localStorage.setItem('moba_userData', JSON.stringify({ ...newUser, createdAt: Date.now() }));
+                }
+
+                document.getElementById('auth-screen').style.display = 'none';
+                triggerLoadingScreen();
+                await initRealtimeListeners(uid);
+            } catch (error) {
+                console.error("Create account flow failed:", error);
+                showError(error?.message || "Could not create account. Please try again.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "CREATE ACCOUNT";
+            }
+        };
+
+        window.loginWithGmail = async function() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const googleUser = result.user;
+
+                const q = query(collection(db, "users"), where("googleUid", "==", googleUser.uid));
+                const querySnapshot = await getDocs(q);
+
+                let uid;
+                if (!querySnapshot.empty) {
+                    uid = querySnapshot.docs[0].id;
+                } else {
+                    uid = googleUser.uid;
+                    const newUser = {
+                        uid, username: googleUser.displayName || "Player", country: "Global", level: 1, 
+                        coins: 20558, diamonds: 3, rank: "Bronze", rankPoints: 0, xp: 0,
+                        createdAt: serverTimestamp(), googleUid: googleUser.uid, friends: [], isOnline: true
+                    };
+                    await setDoc(doc(db, "users", uid), newUser);
+                }
+                
+                document.getElementById('auth-screen').style.display = 'none';
+                triggerLoadingScreen();
+                await initRealtimeListeners(uid);
+            } catch (error) { console.error("Google Login Error:", error); }
+        };
+
+        window.bindGmail = async function() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                await setDoc(doc(db, "users", currentUserData.uid), { googleUid: result.user.uid, boundEmail: result.user.email }, { merge: true });
+                alert("Account bound successfully!");
+            } catch (error) { alert("Failed to bind: " + error.message); }
+        };
+
+        // --- FRIENDS SYSTEM ---
+        window.toggleAddFriendModal = function(show) {
+            const modal = document.getElementById('addFriendModal');
+            show ? modal.classList.add('active') : modal.classList.remove('active');
+            document.getElementById('search-result-container').style.display = 'none';
+        };
+
+        let searchedFoundUser = null;
+
+        window.openPartyAddFriend = function() {
+            // Reuse the existing Add Friend system so there is only one friend database.
+            toggleAddFriendModal(true);
+            const input = document.getElementById('friend-search-input');
+            if (input) {
+                input.value = "";
+                setTimeout(() => input.focus(), 50);
+            }
+        };
+
+        window.searchUserForFriend = async function() {
+            const keyword = document.getElementById('friend-search-input').value.trim();
+            const errorMsg = document.getElementById('search-error-msg');
+            const resultBox = document.getElementById('search-result-container');
+            errorMsg.style.display = 'none'; resultBox.style.display = 'none';
+
+            try {
+                let userDoc = await getDoc(doc(db, "users", keyword));
+                let foundData = userDoc.exists() ? userDoc.data() : null;
+
+                if(!foundData) {
+                    const q = query(collection(db, "users"), where("username", "==", keyword));
+                    const snap = await getDocs(q);
+                    if(!snap.empty) foundData = snap.docs[0].data();
+                }
+
+                if (!foundData) { errorMsg.innerText = "User not found."; errorMsg.style.display = 'block'; return; }
+                if (foundData.uid === currentUserData.uid) { errorMsg.innerText = "Cannot add yourself."; errorMsg.style.display = 'block'; return; }
+
+                searchedFoundUser = foundData;
+                document.getElementById('res-name').innerText = `${foundData.username} (ID: ${foundData.uid})`;
+                document.getElementById('res-status').innerText = `Level ${foundData.level} | ${foundData.rank}`;
+                resultBox.style.display = 'flex';
+            } catch (err) {
+                console.error(err);
+                showToast("Could not search for that player. Please try again.", "error");
+            }
+        };
+
+        window.sendFriendRequest = async function() {
+            if(!searchedFoundUser || !currentUserData) return;
+
+            if(currentUserData.friends && currentUserData.friends.includes(searchedFoundUser.uid)) {
+                alert("Already friends!");
+                return;
+            }
+
+            try {
+                // Prevent duplicate pending requests in either direction.
+                const outgoingQ = query(
+                    collection(db, "friendRequests"),
+                    where("senderId", "==", currentUserData.uid),
+                    where("receiverId", "==", searchedFoundUser.uid),
+                    where("status", "==", "pending")
+                );
+                const incomingQ = query(
+                    collection(db, "friendRequests"),
+                    where("senderId", "==", searchedFoundUser.uid),
+                    where("receiverId", "==", currentUserData.uid),
+                    where("status", "==", "pending")
+                );
+
+                const [outgoingSnap, incomingSnap] = await Promise.all([
+                    getDocs(outgoingQ),
+                    getDocs(incomingQ)
+                ]);
+
+                if (!outgoingSnap.empty) {
+                    alert("Friend request already sent.");
+                    return;
+                }
+
+                if (!incomingSnap.empty) {
+                    alert("This player already sent you a request. Accept it from Friend Requests.");
+                    return;
+                }
+
+                const requestRef = doc(db, "friendRequests", `${currentUserData.uid}_${searchedFoundUser.uid}`);
+                await setDoc(requestRef, {
+                    senderId: currentUserData.uid,
+                    senderName: currentUserData.username,
+                    receiverId: searchedFoundUser.uid,
+                    receiverName: searchedFoundUser.username,
+                    status: "pending",
+                    createdAt: serverTimestamp()
+                });
+
+                showToast(`Friend request sent to ${searchedFoundUser.username}!`, "success");
+                toggleAddFriendModal(false);
+                searchedFoundUser = null;
+            } catch (err) {
+                console.error("Send friend request error:", err);
+                alert("Could not send the friend request. Check your Firebase rules.");
+            }
+        };
+
+        window.acceptFriendRequest = async function(reqId, senderId) {
+            if (!currentUserData || !currentUserData.uid || !senderId) return;
+
+            try {
+                // Use one Firestore transaction so the friendship is created on BOTH
+                // accounts together. This prevents the "only one side is a friend"
+                // problem when two devices are online at the same time.
+                await runTransaction(db, async (transaction) => {
+                    const requestRef = doc(db, "friendRequests", reqId);
+                    const meRef = doc(db, "users", currentUserData.uid);
+                    const senderRef = doc(db, "users", senderId);
+
+                    const [requestSnap, meSnap, senderSnap] = await Promise.all([
+                        transaction.get(requestRef),
+                        transaction.get(meRef),
+                        transaction.get(senderRef)
+                    ]);
+
+                    if (!requestSnap.exists()) throw new Error("Friend request no longer exists.");
+                    if (!meSnap.exists()) throw new Error("Your account no longer exists.");
+                    if (!senderSnap.exists()) throw new Error("The other player account no longer exists.");
+
+                    const request = requestSnap.data();
+                    if (request.receiverId !== currentUserData.uid || request.senderId !== senderId) {
+                        throw new Error("Invalid friend request.");
+                    }
+
+                    const meFriends = Array.isArray(meSnap.data().friends) ? meSnap.data().friends : [];
+                    const senderFriends = Array.isArray(senderSnap.data().friends) ? senderSnap.data().friends : [];
+
+                    transaction.update(meRef, {
+                        friends: meFriends.includes(senderId) ? meFriends : [...meFriends, senderId]
+                    });
+
+                    transaction.update(senderRef, {
+                        friends: senderFriends.includes(currentUserData.uid)
+                            ? senderFriends
+                            : [...senderFriends, currentUserData.uid]
+                    });
+
+                    transaction.update(requestRef, {
+                        status: "accepted",
+                        acceptedAt: serverTimestamp()
+                    });
+                });
+
+                // Refresh the current device immediately; onSnapshot will also keep it synced.
+                const freshMe = await getDoc(doc(db, "users", currentUserData.uid));
+                if (freshMe.exists()) {
+                    currentUserData = freshMe.data();
+                    localStorage.setItem('moba_userData', JSON.stringify(currentUserData));
+                }
+
+                await loadFriendsListRealtime();
+                if (currentPartyLobbyId && document.getElementById('partyLobbyModal')?.classList.contains('active')) {
+                    await renderPartyFriends();
+                }
+                showToast("Friend request accepted. You are now friends.", "success");
+            } catch(e) {
+                console.error("Accept friend request error:", e);
+                alert(e.message || "Could not accept the request. Check your Firebase rules.");
+            }
+        };
+
+        window.rejectFriendRequest = async function(reqId) {
+            try {
+                await updateDoc(doc(db, "friendRequests", reqId), { status: "rejected" });
+                showToast("Friend request declined.", "info");
+            } catch(e) {
+                console.error("Reject friend request error:", e);
+                alert("Could not decline the request.");
+            }
+        };
+
+        async function loadFriendsListRealtime() {
+            const container = document.getElementById('friends-list-container');
+            if (!container || !currentUserData) return;
+
+            const friendIds = Array.isArray(currentUserData.friends)
+                ? [...new Set(currentUserData.friends.filter(Boolean))]
+                : [];
+
+            if (!friendIds.length) {
+                container.innerHTML = `<div class="friend-row"><span style="color:#94a3b8; font-size:11px;">No friends added yet.</span></div>`;
+                return;
+            }
+
+            // Read all friend profiles in parallel instead of one-by-one.
+            const results = await Promise.all(friendIds.map(async (fUid) => {
+                try {
+                    const snap = await getDoc(doc(db, "users", fUid));
+                    return snap.exists() ? { uid: fUid, ...snap.data() } : null;
+                } catch (e) {
+                    console.error("Friend profile load error:", e);
+                    return null;
+                }
+            }));
+
+            const fragment = document.createDocumentFragment();
+
+            results.filter(Boolean).forEach((f) => {
+                const row = document.createElement('div');
+                row.className = 'friend-row';
+                row.innerHTML = `
+                    <div class="friend-info">
+                        <span style="font-weight:700;">${escapePartyText(f.username || "Player")}</span>
+                        <span class="friend-status">
+                            <span class="status-dot ${f.isOnline ? 'online' : 'offline'}"></span>
+                            ${f.isOnline ? 'Online' : 'Offline'}
+                        </span>
+                    </div>
+                    <span style="font-size:10px; color:var(--neon-blue);">Lv.${f.level || 1}</span>
+                `;
+                fragment.appendChild(row);
+            });
+
+            // Replace the list only once, preventing the blinking/flickering effect.
+            container.replaceChildren(fragment);
+
+            if (!container.children.length) {
+                container.innerHTML = `<div class="friend-row"><span style="color:#94a3b8;font-size:11px;">No valid friends found.</span></div>`;
+            }
+        }
+
+        // --- 5-MAN PARTY LOBBY ---
+        window.openPartyLobby = async function() {
+            if (!currentUserData || !currentUserData.uid) {
+                alert("Please log in first.");
+                return;
+            }
+
+            // Open the UI immediately. Do not wait for Firebase before showing the lobby.
+            const modal = document.getElementById('partyLobbyModal');
+            modal.classList.add('active');
+            document.getElementById('party-lobby-id').innerText = 'PARTY ROOM • CONNECTING...';
+            document.getElementById('party-player-count').innerText = '1/5';
+            document.getElementById('party-start-btn').disabled = true;
+            document.getElementById('party-start-btn').innerText = 'CONNECTING...';
+            renderPartySlots({hostId:currentUserData.uid,players:[{
+                uid:currentUserData.uid, username:currentUserData.username,
+                level:currentUserData.level||1, rank:currentUserData.rank||'Bronze'
+            }],status:'waiting'});
+
+            if (currentPartyLobbyId) {
+                subscribeToPartyLobby(currentPartyLobbyId);
+                return;
+            }
+
+            try {
+                // doc(collection()) creates the ID locally, so the lobby can appear instantly.
+                const lobbyRef = doc(collection(db, 'lobbies'));
+                currentPartyLobbyId = lobbyRef.id;
+                document.getElementById('party-lobby-id').innerText = `PARTY ROOM • ${lobbyRef.id.slice(0,8).toUpperCase()}`;
+
+                const lobbyData = {
+                    hostId: currentUserData.uid,
+                    hostName: currentUserData.username,
+                    maxPlayers: 5,
+                    players: [{
+                        uid: currentUserData.uid, username: currentUserData.username,
+                        level: currentUserData.level || 1, rank: currentUserData.rank || 'Bronze'
+                    }],
+                    status: 'waiting', createdAt: serverTimestamp()
+                };
+
+                subscribeToPartyLobby(lobbyRef.id);
+                // Firestore write happens after the UI is already visible.
+                await setDoc(lobbyRef, lobbyData);
+                renderPartyFriends(lobbyData);
+            } catch (e) {
+                console.error('Create lobby error:', e);
+                currentPartyLobbyId = null;
+                modal.classList.remove('active');
+                alert('Could not create the party lobby. Check your Firebase rules/connection.');
+            }
+        };
+
+        function subscribeToPartyLobby(lobbyId) {
+            if (unsubscribePartyLobby) unsubscribePartyLobby();
+
+            unsubscribePartyLobby = onSnapshot(doc(db, "lobbies", lobbyId), (snap) => {
+                if (!snap.exists()) {
+                    currentPartyLobbyId = null;
+                    document.getElementById('partyLobbyModal').classList.remove('active');
+                    return;
+                }
+
+                const lobby = snap.data();
+                renderPartySlots(lobby);
+
+                const count = (lobby.players || []).length;
+                document.getElementById('party-player-count').innerText = `${count}/5`;
+
+                const startBtn = document.getElementById('party-start-btn');
+                const isHost = lobby.hostId === currentUserData.uid;
+                startBtn.disabled = !isHost || count < 1 || lobby.status !== "waiting";
+                startBtn.innerText = lobby.status === "starting" ? "STARTING..." : "START MATCH";
+
+                renderPartyFriends(lobby);
+            });
+        }
+
+        function renderPartySlots(lobby) {
+            const grid = document.getElementById('party-slots-grid');
+            grid.innerHTML = "";
+
+            const players = lobby.players || [];
+            for (let i = 0; i < 5; i++) {
+                const player = players[i];
+                const slot = document.createElement('div');
+                slot.className = `party-slot ${player ? 'filled' : ''}`;
+
+                if (player) {
+                    slot.innerHTML = `
+                        <div class="party-slot-avatar">👤</div>
+                        <div style="min-width:0;">
+                            <div class="party-slot-name">
+                                ${escapePartyText(player.username)}
+                                ${player.uid === lobby.hostId ? '<span class="party-host-badge">HOST</span>' : ''}
+                            </div>
+                            <div class="party-slot-status">Lv.${player.level || 1} • ${escapePartyText(player.rank || "Bronze")}</div>
+                            <div class="party-slot-status" style="color:#10b981;">● IN PARTY</div>
+                        </div>
+                    `;
+                } else {
+                    slot.innerHTML = `<div class="party-empty">EMPTY SLOT ${i + 1}<br><span style="font-size:10px;">Invite a player</span></div>`;
+                }
+                grid.appendChild(slot);
+            }
+        }
+
+        async function renderPartyFriends(lobby = null) {
+            const container = document.getElementById('party-friends-list');
+            if (!container || !currentUserData) return;
+
+            const friendIds = Array.isArray(currentUserData.friends)
+                ? [...new Set(currentUserData.friends.filter(Boolean))]
+                : [];
+
+            const players = lobby && Array.isArray(lobby.players) ? lobby.players : [];
+            const playerIds = new Set(players.map(p => p.uid));
+
+            if (!friendIds.length) {
+                container.innerHTML = `<div style="color:#64748b;font-size:11px;margin-top:12px;">No friends available. Add friends first.</div>`;
+                return;
+            }
+
+            const results = await Promise.all(friendIds.map(async (friendUid) => {
+                try {
+                    const snap = await getDoc(doc(db, "users", friendUid));
+                    return snap.exists() ? { uid: friendUid, ...snap.data() } : null;
+                } catch (e) {
+                    console.error("Party friend load error:", e);
+                    return null;
+                }
+            }));
+
+            const fragment = document.createDocumentFragment();
+
+            const title = document.createElement('div');
+            title.style.cssText = "color:#64748b;font-size:10px;padding:8px 0;";
+            title.textContent = "FRIENDS";
+            fragment.appendChild(title);
+
+            results.filter(Boolean).forEach((friend) => {
+                const row = document.createElement('div');
+                row.className = 'party-friend-row';
+
+                const alreadyInParty = playerIds.has(friend.uid);
+                const full = players.length >= 5;
+
+                row.innerHTML = `
+                    <div class="party-friend-info">
+                        <div class="party-friend-name">${escapePartyText(friend.username || "Player")}</div>
+                        <div class="party-friend-status" style="color:${friend.isOnline ? '#10b981' : '#64748b'}">
+                            ${friend.isOnline ? '● Online' : '● Offline'} • Lv.${friend.level || 1}
+                        </div>
+                    </div>
+                    <button class="party-invite-btn"
+                        ${alreadyInParty || full ? 'disabled' : ''}
+                        onclick="invitePlayerToParty('${friend.uid}')">
+                        ${alreadyInParty ? 'IN PARTY' : full ? 'FULL' : 'INVITE'}
+                    </button>
+                `;
+                fragment.appendChild(row);
+            });
+
+            // One DOM update = no blinking while Firestore reads finish.
+            container.replaceChildren(fragment);
+        }
+
+        window.invitePlayerToParty = async function(friendUid) {
+            if (!currentPartyLobbyId || !currentUserData) return;
+
+            try {
+                const lobbySnap = await getDoc(doc(db, "lobbies", currentPartyLobbyId));
+                if (!lobbySnap.exists()) return alert("Lobby no longer exists.");
+
+                const lobby = lobbySnap.data();
+                if (lobby.hostId !== currentUserData.uid) {
+                    alert("Only the lobby host can invite players.");
+                    return;
+                }
+                if ((lobby.players || []).length >= 5) {
+                    alert("The lobby is full.");
+                    return;
+                }
+                if ((lobby.players || []).some(p => p.uid === friendUid)) {
+                    alert("That player is already in the lobby.");
+                    return;
+                }
+
+                const friendSnap = await getDoc(doc(db, "users", friendUid));
+                if (!friendSnap.exists()) return alert("Player not found.");
+                const friend = friendSnap.data();
+
+                // Avoid creating duplicate pending invites.
+                const existingInviteSnap = await getDocs(query(
+                    collection(db, "lobbyInvites"),
+                    where("lobbyId", "==", currentPartyLobbyId),
+                    where("receiverId", "==", friendUid),
+                    where("status", "==", "pending")
+                ));
+
+                if (!existingInviteSnap.empty) {
+                    showToast(`An invite is already pending for ${friend.username}.`, "warning");
+                    return;
+                }
+
+                await addDoc(collection(db, "lobbyInvites"), {
+                    lobbyId: currentPartyLobbyId,
+                    receiverId: friendUid,
+                    receiverName: friend.username,
+                    senderId: currentUserData.uid,
+                    senderName: currentUserData.username,
+                    status: "pending",
+                    createdAt: serverTimestamp()
+                });
+
+                showToast(`Party invite sent to ${friend.username}.`, "success");
+            } catch (e) {
+                console.error("Invite error:", e);
+                alert("Could not send the invite.");
+            }
+        };
+
+        let acceptingPartyInvite = false;
+
+        // Prevent the invite button from getting stuck on JOINING forever.
+        function withPartyTimeout(promise, ms = 12000, label = "Firebase request") {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => {
+                    const err = new Error(`${label} timed out. Check your connection and Firebase.`);
+                    err.code = "party-timeout";
+                    reject(err);
+                }, ms))
+            ]);
+        }
+
+        function openJoinedPartyLobby(lobbyId) {
+            pendingPartyInvite = null;
+            document.getElementById('lobbyInviteBadge').classList.remove('active');
+            currentPartyLobbyId = lobbyId;
+            document.getElementById('partyLobbyModal').classList.add('active');
+            document.getElementById('party-lobby-id').innerText =
+                `PARTY ROOM • ${String(lobbyId).slice(0,8).toUpperCase()}`;
+            subscribeToPartyLobby(lobbyId);
+        }
+
+        window.acceptPartyInvite = async function() {
+            if (!pendingPartyInvite || !currentUserData || acceptingPartyInvite) return;
+
+            const invite = { ...pendingPartyInvite };
+            acceptingPartyInvite = true;
+
+            const acceptBtn = document.querySelector('#lobbyInviteBadge .lobby-invite-actions button:first-child');
+            const declineBtn = document.querySelector('#lobbyInviteBadge .lobby-invite-actions button:last-child');
+
+            if (acceptBtn) {
+                acceptBtn.disabled = true;
+                acceptBtn.innerText = "JOINING...";
+            }
+            if (declineBtn) declineBtn.disabled = true;
+
+            try {
+                if (!invite.lobbyId || !invite.id) {
+                    throw new Error("This party invitation is invalid or expired.");
+                }
+
+                const lobbyRef = doc(db, "lobbies", invite.lobbyId);
+                const inviteRef = doc(db, "lobbyInvites", invite.id);
+
+                const lobbySnap = await withPartyTimeout(
+                    getDoc(lobbyRef), 12000, "Loading party lobby"
+                );
+
+                if (!lobbySnap.exists()) throw new Error("Lobby no longer exists.");
+
+                const lobby = lobbySnap.data() || {};
+                const players = Array.isArray(lobby.players) ? lobby.players : [];
+
+                if (lobby.status && lobby.status !== "waiting") {
+                    throw new Error("This lobby is no longer accepting players.");
+                }
+
+                // Already joined: open the lobby without trying another join write.
+                if (players.some(p => p && p.uid === currentUserData.uid)) {
+                    openJoinedPartyLobby(invite.lobbyId);
+
+                    try {
+                        await withPartyTimeout(
+                            updateDoc(inviteRef, {
+                                status: "accepted",
+                                acceptedAt: serverTimestamp()
+                            }),
+                            8000, "Updating invitation"
+                        );
+                    } catch (inviteError) {
+                        console.warn("Could not update invite status:", inviteError);
+                    }
+
+                    showToast("You joined the party lobby.", "success");
+                    return;
+                }
+
+                if (players.length >= 5) throw new Error("Lobby is already full.");
+
+                const playerEntry = {
+                    uid: currentUserData.uid,
+                    username: currentUserData.username,
+                    level: currentUserData.level || 1,
+                    rank: currentUserData.rank || "Bronze"
+                };
+
+                // Atomically add the player and accept the invite.
+                const batch = writeBatch(db);
+                batch.update(lobbyRef, {
+                    players: arrayUnion(playerEntry)
+                });
+                batch.update(inviteRef, {
+                    status: "accepted",
+                    acceptedAt: serverTimestamp()
+                });
+
+                await withPartyTimeout(
+                    batch.commit(), 12000, "Joining party lobby"
+                );
+
+                openJoinedPartyLobby(invite.lobbyId);
+                showToast("You joined the party lobby.", "success");
+
+            } catch (e) {
+                console.error("Accept party invite error:", e);
+
+                const code = e?.code || "";
+
+                if (code === "party-timeout") {
+                    showToast(
+                        "Joining timed out. Firebase did not respond. Check your connection and try again.",
+                        "error", 7000
+                    );
+                } else if (code === "resource-exhausted") {
+                    showToast(
+                        "Firebase Firestore quota is exhausted. The lobby cannot be updated until the quota resets.",
+                        "error", 7000
+                    );
+                } else if (code === "permission-denied") {
+                    showToast(
+                        "Firebase denied the lobby join. Check your Firestore rules for lobbies and lobbyInvites.",
+                        "error", 7000
+                    );
+                } else {
+                    showToast(e?.message || "Could not join the party.", "error", 6000);
+                }
+
+            } finally {
+                // Always restore the button even if Firebase fails or times out.
+                acceptingPartyInvite = false;
+
+                if (acceptBtn) {
+                    acceptBtn.disabled = false;
+                    acceptBtn.innerText = "ACCEPT";
+                }
+
+                if (declineBtn) declineBtn.disabled = false;
+            }
+        };
+
+        window.declinePartyInvite = async function() {
+            if (!pendingPartyInvite || acceptingPartyInvite) return;
+            const invite = { ...pendingPartyInvite };
+
+            try {
+                await updateDoc(doc(db, "lobbyInvites", invite.id), {
+                    status: "declined",
+                    declinedAt: serverTimestamp()
+                });
+                pendingPartyInvite = null;
+                document.getElementById('lobbyInviteBadge').classList.remove('active');
+                showToast("Party invitation declined.", "info");
+            } catch (e) {
+                console.error("Decline party invite error:", e);
+                showToast(
+                    e?.code === "resource-exhausted"
+                        ? "Firebase quota is exhausted. Please try again later."
+                        : "Could not decline the invitation.",
+                    "error"
+                );
+            }
+        };
+
+        window.leavePartyLobby = async function() {
+            if (!currentPartyLobbyId) {
+                document.getElementById('partyLobbyModal').classList.remove('active');
+                return;
+            }
+
+            const lobbyId = currentPartyLobbyId;
+            try {
+                const lobbyRef = doc(db, "lobbies", lobbyId);
+                const lobbySnap = await getDoc(lobbyRef);
+
+                if (lobbySnap.exists()) {
+                    const lobby = lobbySnap.data();
+
+                    if (lobby.hostId === currentUserData.uid) {
+                        await deleteDoc(lobbyRef);
+                    } else {
+                        await updateDoc(lobbyRef, {
+                            players: arrayRemove({
+                                uid: currentUserData.uid,
+                                username: currentUserData.username,
+                                level: currentUserData.level || 1,
+                                rank: currentUserData.rank || "Bronze"
+                            })
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Leave lobby error:", e);
+            }
+
+            if (unsubscribePartyLobby) unsubscribePartyLobby();
+            unsubscribePartyLobby = null;
+            currentPartyLobbyId = null;
+            document.getElementById('partyLobbyModal').classList.remove('active');
+        };
+
+        window.startPartyMatch = async function() {
+            if (!currentPartyLobbyId || !currentUserData) return;
+
+            try {
+                const lobbyRef = doc(db, "lobbies", currentPartyLobbyId);
+                const lobbySnap = await getDoc(lobbyRef);
+                if (!lobbySnap.exists()) return alert("Lobby no longer exists.");
+
+                const lobby = lobbySnap.data();
+                if (lobby.hostId !== currentUserData.uid) return;
+                if ((lobby.players || []).length < 1) return;
+
+                await updateDoc(lobbyRef, { status: "starting" });
+                document.getElementById('party-start-btn').disabled = true;
+
+                // Keep the existing game flow untouched for now.
+                setTimeout(() => {
+                    alert("Party ready! Matchmaking can be connected to the hero-selection/game flow next.");
+                }, 350);
+            } catch (e) {
+                console.error("Start party error:", e);
+                alert("Could not start the party.");
+            }
+        };
+
+        function escapePartyText(value) {
+            return String(value ?? "").replace(/[&<>"']/g, c => ({
+                "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+            }[c]));
+        }
+
+        // --- SHOP & PURCHASING (TRANSACTIONS) ---
+        let currentShopCategory = 'all';
+        window.openShopModal = function() {
+            document.getElementById('shopModal').classList.add('active');
+            renderShop();
+        };
+
+        window.switchShopTab = function(tab, btn) {
+            document.querySelectorAll('#shopModal .profile-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentShopCategory = tab;
+            renderShop();
+        };
+
+        window.filterShopItems = function() { renderShop(); };
+
+        function renderShop() {
+            const grid = document.getElementById('shop-item-grid');
+            grid.innerHTML = "";
+            const queryTxt = document.getElementById('shop-search').value.toLowerCase();
+            
+            let items = shopItemsData;
+            if(currentShopCategory !== 'all') items = items.filter(i => i.category === currentShopCategory);
+            if(queryTxt) items = items.filter(i => i.name.toLowerCase().includes(queryTxt));
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.innerHTML = `
+                    <div class="shop-card-img">
+                        <span class="rarity-badge rarity-${item.rarity}">${item.rarity}</span>
+                        <span>${item.icon}</span>
+                    </div>
+                    <div class="shop-card-body">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price-row">
+                            <span style="color: ${item.currency === 'diamonds' ? 'var(--neon-blue)' : 'var(--neon-gold);'}">
+                                ${item.currency === 'diamonds' ? '💎' : '🪙'} ${item.price.toLocaleString()}
+                            </span>
+                        </div>
+                        <button class="buy-card-btn" onclick="buyItem('${item.id}')">BUY NOW</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.buyItem = async function(shopId) {
+            const item = shopItemsData.find(i => i.id === shopId);
+            if(!item) return;
+
+            const userRef = doc(db, "users", currentUserData.uid);
+            const inventoryRef = doc(collection(db, "users", currentUserData.uid, "inventory"));
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw "User does not exist!";
+                    
+                    const userData = userDoc.data();
+                    let currentBalance = userData[item.currency] || 0;
+                    
+                    if (currentBalance < item.price) {
+                        throw `Insufficient ${item.currency}.`;
+                    }
+                    
+                    transaction.update(userRef, { [item.currency]: currentBalance - item.price });
+                    transaction.set(inventoryRef, { 
+                        itemId: item.itemId, name: item.name, icon: item.icon, 
+                        category: item.category, rarity: item.rarity, acquiredAt: serverTimestamp() 
+                    });
+                });
+                alert("Purchase successful!");
+            } catch (e) {
+                alert(e);
+            }
+        };
+
+        // --- INVENTORY ---
+        window.openInventoryModal = function() {
+            document.getElementById('inventoryModal').classList.add('active');
+            renderInventory();
+        };
+
+        window.filterInventoryItems = function() { renderInventory(); };
+
+        function renderInventory() {
+            const grid = document.getElementById('inventory-grid-container');
+            grid.innerHTML = "";
+            const queryTxt = document.getElementById('inv-search').value.toLowerCase();
+            
+            let items = inventoryData;
+            if(queryTxt) items = items.filter(i => i.name.toLowerCase().includes(queryTxt));
+
+            items.forEach(item => {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-item-slot';
+                slot.innerHTML = `<span style="font-size:28px;">${item.icon}</span>`;
+                slot.onclick = () => {
+                    document.getElementById('inv-detail-name').innerText = item.name;
+                    document.getElementById('inv-detail-desc').innerHTML = `Category: ${item.category} <br>Rarity: ${item.rarity}`;
+                };
+                grid.appendChild(slot);
+            });
+        }
+
+        // --- HEROES ---
+        window.openHeroesModal = function() {
+            document.getElementById('heroesModal').classList.add('active');
+            renderHeroes();
+        };
+        window.filterHeroesList = function() { renderHeroes(); };
+
+        function renderHeroes() {
+            const sidebar = document.getElementById('hero-grid-sidebar');
+            sidebar.innerHTML = "";
+            const queryTxt = document.getElementById('hero-search').value.toLowerCase();
+            
+            let filtered = heroData;
+            if(queryTxt) filtered = filtered.filter(h => h.name.toLowerCase().includes(queryTxt));
+
+            filtered.forEach(hero => {
+                const owned = inventoryData.some(i => i.itemId === hero.id);
+                const thumb = document.createElement('div');
+                thumb.className = `hero-thumb`;
+                thumb.innerHTML = `<span>${hero.icon}</span><span style="position:absolute; bottom:2px; left:4px; font-size:9px; color:${owned?'#0f0':'#f44'};">${owned?'Owned':'Locked'}</span>`;
+                thumb.onclick = () => {
+                    document.getElementById('hero-detail-pane').innerHTML = `
+                        <h3 style="color:var(--neon-blue);">${hero.name}</h3>
+                        <p>Role: ${hero.role} | Rarity: ${hero.rarity}</p>
+                        <p style="color:${owned?'#0f0':'#f44'}">${owned?'Ready to play':'Not Owned'}</p>
+                    `;
+                };
+                sidebar.appendChild(thumb);
+            });
+        }
+
+        // --- EVENTS ---
+        window.openEventsModal = async function() {
+            document.getElementById('eventsModal').classList.add('active');
+            const snap = await getDocs(collection(db, "events"));
+            eventsData = []; snap.forEach(d => eventsData.push({id: d.id, ...d.data()}));
+            renderEvents();
+        };
+
+        function renderEvents() {
+            const container = document.getElementById('events-layout-container');
+            container.innerHTML = "";
+            eventsData.filter(e => e.active).forEach(ev => {
+                const isClaimed = currentUserData.eventsClaimed && currentUserData.eventsClaimed.includes(ev.id);
+                const card = document.createElement('div');
+                card.className = 'event-banner-card';
+                card.innerHTML = `
+                    <div class="event-banner-top"><span style="font-size:16px; font-weight:bold; color:var(--neon-blue);">${ev.title}</span></div>
+                    <div style="font-size:13px; color:#94a3b8;">${ev.description}</div>
+                    <div class="event-footer">
+                        <button class="change-photo-btn" ${isClaimed ? 'disabled style="background:#555;"' : ''} onclick="claimEvent('${ev.id}')">${isClaimed ? 'CLAIMED' : 'CLAIM REWARD'}</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.claimEvent = async function(eventId) {
+            const ev = eventsData.find(e => e.id === eventId);
+            try {
+                await updateDoc(doc(db, "users", currentUserData.uid), {
+                    eventsClaimed: arrayUnion(eventId),
+                    coins: (currentUserData.coins || 0) + (ev.rewards.coins || 0),
+                    diamonds: (currentUserData.diamonds || 0) + (ev.rewards.diamonds || 0)
+                });
+                alert("Event Reward Claimed!");
+                openEventsModal(); // refresh
+            } catch(e) { console.error(e); }
+        };
+
+        // --- ACHIEVEMENTS ---
+        window.openAchievementsModal = async function() {
+            document.getElementById('achievementsModal').classList.add('active');
+            const snap = await getDocs(collection(db, "achievementsConfig"));
+            achievementsData = []; snap.forEach(d => achievementsData.push({id: d.id, ...d.data()}));
+            renderAchievements();
+        };
+
+        function renderAchievements() {
+            const container = document.getElementById('achievements-list-container');
+            container.innerHTML = "";
+            achievementsData.forEach(ach => {
+                const card = document.createElement('div');
+                card.className = 'achievement-card';
+                card.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:15px; flex-grow:1;">
+                        <div class="achievement-icon">🏆</div>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <div style="font-weight:bold; font-size:15px;">${ach.title} <span style="font-size:11px; color:var(--neon-gold);">+${ach.points} pts</span></div>
+                            <div style="font-size:12px; color:#94a3b8;">${ach.desc}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- MAIL ---
+        let selectedMail = null;
+        window.openMailModal = function() {
+            document.getElementById('mailModal').classList.add('active');
+            renderMailList();
+        };
+
+        function renderMailList() {
+            const container = document.getElementById('mail-list-container');
+            container.innerHTML = "";
+            mailData.forEach(mail => {
+                const row = document.createElement('div');
+                row.className = `mail-row ${mail.unread ? 'unread' : ''} ${selectedMail && selectedMail.id === mail.id ? 'active' : ''}`;
+                row.innerHTML = `<div style="font-weight:bold; font-size:13px;">${mail.subject}</div><div style="font-size:11px; color:#94a3b8;">${mail.sender}</div>`;
+                row.onclick = async () => {
+                    selectedMail = mail;
+                    if(mail.unread) { await updateDoc(doc(db, "users", currentUserData.uid, "mail", mail.id), { unread: false }); }
+                    document.getElementById('mail-subject').innerText = mail.subject;
+                    document.getElementById('mail-sender-date').innerText = `Sender: ${mail.sender}`;
+                    document.getElementById('mail-body-text').innerText = mail.body;
+                    
+                    const rewardSec = document.getElementById('mail-reward-section');
+                    if(mail.rewards && Object.keys(mail.rewards).length > 0 && !mail.claimed) {
+                        rewardSec.style.display = 'flex';
+                    } else {
+                        rewardSec.style.display = 'none';
+                    }
+                    renderMailList();
+                };
+                container.appendChild(row);
+            });
+        }
+
+        window.claimCurrentMailReward = async function() {
+            if(!selectedMail || selectedMail.claimed) return;
+            try {
+                await updateDoc(doc(db, "users", currentUserData.uid), {
+                    coins: (currentUserData.coins || 0) + (selectedMail.rewards.coins || 0),
+                    diamonds: (currentUserData.diamonds || 0) + (selectedMail.rewards.diamonds || 0)
+                });
+                await updateDoc(doc(db, "users", currentUserData.uid, "mail", selectedMail.id), { claimed: true });
+                alert("Mail reward claimed!");
+                selectedMail.claimed = true;
+                document.getElementById('mail-reward-section').style.display = 'none';
+            } catch(e) { console.error(e); }
+        };
+
+        // --- SETTINGS ---
+        window.openSettingsModal = function() {
+            document.getElementById('settingsModal').classList.add('active');
+        };
+        window.saveSetting = async function(key, val) {
+            try {
+                await updateDoc(doc(db, "users", currentUserData.uid), { [`settings.${key}`]: val });
+            } catch(e) { console.error(e); }
+        };
+
+        // --- UTILS ---
+        function populateUI(user) {
+            document.getElementById('display-username-top').innerText = user.username;
+            document.getElementById('display-country-top').innerText = `Lv. ${user.level} • ${user.country}`;
+            document.getElementById('gold-count').innerText = user.coins ? user.coins.toLocaleString() : "0";
+            document.getElementById('diamond-count').innerText = user.diamonds ? user.diamonds : "0";
+            document.getElementById('rank-display-text').innerText = user.rank;
+            
+            document.getElementById('modal-display-username').innerText = user.username;
+            document.getElementById('modal-display-country').innerText = user.country;
+            document.getElementById('modal-display-id').innerText = user.uid;
+            document.getElementById('modal-display-level').innerText = user.level;
+            document.getElementById('modal-display-rank').innerText = user.rank;
+            document.getElementById('stat-rank-pts').innerText = user.rankPoints;
+            document.getElementById('stat-xp').innerText = user.xp;
+
+            if (user.boundEmail) {
+                document.getElementById('bind-btn-text').innerText = `Bound to: ${user.boundEmail}`;
+                document.getElementById('gmail-bind-btn').disabled = true;
+            }
+        }
+
+        window.toggleProfileModal = function(show) {
+            const modal = document.getElementById('profileModal');
+            if(show) { modal.classList.add('active'); switchProfileTab('profile', document.querySelector('#profileModal .profile-tab-btn')); } 
+            else modal.classList.remove('active');
+        };
+
+        window.switchProfileTab = function(tabName, btnElement) {
+            document.querySelectorAll('#profileModal .profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#profileModal .profile-section-block').forEach(pane => pane.classList.remove('active'));
+            btnElement.classList.add('active');
+            document.getElementById(`p-tab-${tabName}`).classList.add('active');
+        };
+
+        window.closeModal = function(modalId) { document.getElementById(modalId).classList.remove('active'); };
+
+        window.wipeData = async function() {
+            if (!currentUserData || !currentUserData.uid) {
+                localStorage.removeItem('moba_userData');
+                location.reload();
+                return;
+            }
+
+            const confirmed = confirm(
+                "Delete this game account permanently?\n\n" +
+                "This removes the game account from Firebase, including its friends and profile data. " +
+                "This cannot be undone."
+            );
+            if (!confirmed) return;
+
+            const uid = currentUserData.uid;
+            const wipeButton = document.querySelector('.btn-wipe');
+            if (wipeButton) {
+                wipeButton.disabled = true;
+                wipeButton.innerText = "DELETING ACCOUNT...";
+            }
+
+            try {
+                // Stop realtime listeners first so they cannot immediately write the
+                // deleted account back to localStorage.
+                if (unsubscribeUser) unsubscribeUser();
+                if (unsubscribeFriends) unsubscribeFriends();
+                if (unsubscribeFriendRequests) unsubscribeFriendRequests();
+                if (unsubscribeInventory) unsubscribeInventory();
+                if (unsubscribeMail) unsubscribeMail();
+                if (unsubscribePartyLobby) unsubscribePartyLobby();
+                if (unsubscribePartyInvites) unsubscribePartyInvites();
+
+                // Mark offline before deleting the account document.
+                try {
+                    await setDoc(doc(db, "users", uid), {
+                        isOnline: false,
+                        lastSeen: serverTimestamp()
+                    }, { merge: true });
+                } catch (_) {}
+
+                // Remove the game account document itself.
+                // This is the important difference from the old logout-only behavior.
+                await deleteDoc(doc(db, "users", uid));
+
+                // Remove pending friend requests involving this account.
+                // These cleanup queries are best-effort; the account is already deleted.
+                try {
+                    const sent = await getDocs(query(
+                        collection(db, "friendRequests"),
+                        where("senderId", "==", uid)
+                    ));
+                    const received = await getDocs(query(
+                        collection(db, "friendRequests"),
+                        where("receiverId", "==", uid)
+                    ));
+
+                    const batch = writeBatch(db);
+                    [...sent.docs, ...received.docs].forEach(d => batch.delete(d.ref));
+                    if ([...sent.docs, ...received.docs].length) await batch.commit();
+                } catch (cleanupError) {
+                    console.warn("Friend request cleanup skipped:", cleanupError);
+                }
+
+                currentUserData = null;
+                currentPartyLobbyId = null;
+                pendingPartyInvite = null;
+
+                localStorage.removeItem('moba_userData');
+
+                // Clear the auth UI so a deleted dummy account cannot be auto-restored.
+                document.getElementById('main-game-screen').style.display = 'none';
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('auth-screen').style.display = 'flex';
+
+                alert("Game account deleted successfully. You can now create a new account.");
+            } catch (e) {
+                console.error("Delete account error:", e);
+                if (wipeButton) {
+                    wipeButton.disabled = false;
+                    wipeButton.innerText = "Wipe Local Data & Logout";
+                }
+                alert("Could not delete the account. Check your Firebase Firestore rules and try again.");
+            }
+        };
+
+        function triggerLoadingScreen() {
+            document.getElementById('loading-screen').style.display = 'flex';
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                document.getElementById('loading-bar').style.width = `${progress}%`;
+                if(progress >= 100) { clearInterval(interval); document.getElementById('loading-screen').style.display = 'none'; document.getElementById('main-game-screen').style.display = 'flex'; }
+            }, 200);
+        }
+
+        function startPingSimulator() {
+            const pt = document.getElementById('ping-text'), pbox = document.getElementById('ping-indicator');
+            setInterval(() => {
+                const ms = Math.floor(Math.random() * 30) + 15;
+                pt.innerText = `${ms}ms`;
+                pbox.className = 'ping-display';
+            }, 2000);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                ['profileModal', 'addFriendModal', 'shopModal', 'eventsModal', 'heroesModal', 'achievementsModal', 'inventoryModal', 'mailModal', 'settingsModal', 'partyLobbyModal'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.classList.remove('active');
+                });
+            }
+        });
+    </script>
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
